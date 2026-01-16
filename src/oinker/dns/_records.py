@@ -84,6 +84,24 @@ def _validate_priority(priority: int) -> None:
         raise ValidationError(msg)
 
 
+def _safe_int(value: str, default: int) -> int:
+    """Safely parse a string to int with fallback.
+
+    Args:
+        value: String to parse.
+        default: Default value if parsing fails.
+
+    Returns:
+        Parsed integer or default.
+    """
+    if not value:
+        return default
+    try:
+        return int(value)
+    except ValueError:
+        return default
+
+
 @dataclass(slots=True)
 class ARecord:
     """A record pointing to an IPv4 address.
@@ -193,7 +211,7 @@ class CNAMERecord:
 
     Attributes:
         content: Target hostname.
-        name: Subdomain (required, cannot be root).
+        name: Subdomain (None allowed, but may be rejected by API for root CNAMEs).
         ttl: Time to live in seconds (min 600).
         notes: Optional notes for the record.
     """
@@ -493,7 +511,7 @@ class DNSRecordResponse:
             name=data.get("name", ""),
             record_type=data.get("type", ""),
             content=data.get("content", ""),
-            ttl=int(data.get("ttl", "600")),
-            priority=int(data.get("prio", "0")),
+            ttl=_safe_int(data.get("ttl", ""), 600),
+            priority=_safe_int(data.get("prio", ""), 0),
             notes=data.get("notes", ""),
         )
