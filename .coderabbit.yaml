@@ -113,6 +113,23 @@ reviews:
         - from_api_response() not handling missing/malformed fields
         - Priority validation missing for MX/SRV records
 
+    - path: "src/oinker/dnssec/**/*.py"
+      instructions: |
+        DNSSEC record management at the registry level.
+
+        INVERSION: What would cause DNSSEC operations to fail?
+        - Not handling registry-specific field requirements
+        - from_api_response() not handling dict-keyed records
+        - Missing optional key data fields in create request
+
+    - path: "src/oinker/ssl/**/*.py"
+      instructions: |
+        SSL certificate bundle retrieval.
+
+        INVERSION: What would cause SSL operations to fail?
+        - Not handling empty certificate bundles
+        - from_api_response() using wrong key names (certificatechain vs certificate_chain)
+
     - path: "tests/**/*.py"
       instructions: |
         pytest with pytest-asyncio (asyncio_mode = "auto").

@@ -89,6 +89,19 @@ Async-first Porkbun DNS client library. Python 3.13+.
 - `from_api_response()` not handling missing/malformed fields
 - Priority validation missing for MX/SRV records
 
+### DNSSEC (`src/oinker/dnssec/**/*.py`)
+
+**What would cause DNSSEC operations to fail?**
+- Not handling registry-specific field requirements
+- `from_api_response()` not handling dict-keyed records
+- Missing optional key data fields in create request
+
+### SSL (`src/oinker/ssl/**/*.py`)
+
+**What would cause SSL operations to fail?**
+- Not handling empty certificate bundles
+- `from_api_response()` using wrong key names (certificatechain vs certificate_chain)
+
 ### Tests (`tests/**/*.py`)
 
 **What would make these tests meaningless?**

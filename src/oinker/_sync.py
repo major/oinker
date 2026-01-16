@@ -13,7 +13,9 @@ from typing import TYPE_CHECKING, Any, TypeVar
 from oinker._client import AsyncPiglet
 from oinker._types import PingResponse
 from oinker.dns._sync import SyncDNSAPI
+from oinker.dnssec._sync import SyncDNSSECAPI
 from oinker.domains._sync import SyncDomainsAPI
+from oinker.ssl._sync import SyncSSLAPI
 
 if TYPE_CHECKING:
     import httpx
@@ -71,7 +73,9 @@ class Piglet:
         )
         self._loop: asyncio.AbstractEventLoop | None = None
         self._dns: SyncDNSAPI | None = None
+        self._dnssec: SyncDNSSECAPI | None = None
         self._domains: SyncDomainsAPI | None = None
+        self._ssl: SyncSSLAPI | None = None
 
     @property
     def dns(self) -> SyncDNSAPI:
@@ -81,11 +85,25 @@ class Piglet:
         return self._dns
 
     @property
+    def dnssec(self) -> SyncDNSSECAPI:
+        """Access DNSSEC operations."""
+        if self._dnssec is None:
+            self._dnssec = SyncDNSSECAPI(self._async_client.dnssec, self._run)
+        return self._dnssec
+
+    @property
     def domains(self) -> SyncDomainsAPI:
         """Access domain operations."""
         if self._domains is None:
             self._domains = SyncDomainsAPI(self._async_client.domains, self._run)
         return self._domains
+
+    @property
+    def ssl(self) -> SyncSSLAPI:
+        """Access SSL operations."""
+        if self._ssl is None:
+            self._ssl = SyncSSLAPI(self._async_client.ssl, self._run)
+        return self._ssl
 
     def _get_loop(self) -> asyncio.AbstractEventLoop:
         """Get or create an event loop for running async code."""

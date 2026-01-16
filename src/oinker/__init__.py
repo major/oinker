@@ -41,6 +41,7 @@ from oinker.dns import (
     TLSARecord,
     TXTRecord,
 )
+from oinker.dnssec import DNSSECRecord, DNSSECRecordCreate
 from oinker.domains import (
     DomainAvailability,
     DomainInfo,
@@ -50,6 +51,7 @@ from oinker.domains import (
     URLForward,
     URLForwardCreate,
 )
+from oinker.ssl import SSLBundle
 
 __all__ = [
     # Clients
@@ -81,6 +83,11 @@ __all__ = [
     "URLForward",
     "URLForwardCreate",
     "GlueRecord",
+    # DNSSEC Types
+    "DNSSECRecord",
+    "DNSSECRecordCreate",
+    # SSL Types
+    "SSLBundle",
     # Exceptions
     "OinkerError",
     "AuthenticationError",
