@@ -1,10 +1,10 @@
-# Oinker
+# 🐷 Oinker
 
-**A delightfully Pythonic library for managing DNS at Porkbun.**
+**A delightfully Pythonic library for managing DNS at Porkbun.** 🐽
 
 Oinker provides a modern, type-safe Python interface to the [Porkbun API](https://porkbun.com/api/json/v3/documentation). It's async-first for performance, with sync wrappers for simplicity.
 
-## Features
+## ✨ Features
 
 - **Async-first design** - Built on httpx for modern async/await support
 - **Type-safe records** - Dataclasses with validation for all DNS record types
@@ -13,7 +13,7 @@ Oinker provides a modern, type-safe Python interface to the [Porkbun API](https:
 - **Auto-retry** - Exponential backoff for transient failures
 - **Python 3.13+** - Modern Python with full type annotations
 
-## Quick Example
+## 🚀 Quick Example
 
 === "Async (recommended)"
 
@@ -61,7 +61,7 @@ Oinker provides a modern, type-safe Python interface to the [Porkbun API](https:
     oinker dns create example.com A www 1.2.3.4
     ```
 
-## Installation
+## 📦 Installation
 
 ```bash
 pip install oinker
@@ -73,7 +73,7 @@ For CLI support:
 pip install "oinker[cli]"
 ```
 
-## Authentication
+## 🔑 Authentication
 
 Set your Porkbun API credentials as environment variables:
 
@@ -91,7 +91,7 @@ async with AsyncPiglet(api_key="pk1_...", secret_key="sk1_...") as piglet:
     ...
 ```
 
-## What's Next?
+## 📚 What's Next?
 
 - [Getting Started](getting-started.md) - Installation and first steps
 - [Async vs Sync](async-vs-sync.md) - When to use which client

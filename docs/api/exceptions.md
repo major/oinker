@@ -1,4 +1,4 @@
-# Exceptions
+# ⚠️ Exceptions
 
 All Oinker exceptions inherit from `OinkerError` for easy catching.
 

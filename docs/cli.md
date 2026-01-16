@@ -1,8 +1,8 @@
-# CLI Reference
+# 💻 CLI Reference
 
 Oinker includes a command-line interface for managing DNS records.
 
-## Installation
+## 📦 Installation
 
 The CLI requires optional dependencies:
 
@@ -10,7 +10,7 @@ The CLI requires optional dependencies:
 pip install "oinker[cli]"
 ```
 
-## Authentication
+## 🔑 Authentication
 
 Set your credentials as environment variables:
 
@@ -25,7 +25,7 @@ Or pass them with each command:
 oinker --api-key "pk1_..." --secret-key "sk1_..." ping
 ```
 
-## Commands
+## 🐷 Commands
 
 ### ping
 
@@ -131,7 +131,7 @@ Output:
 🐷 Gobbled up record 123456
 ```
 
-## Common Options
+## ⚙️ Common Options
 
 These options are available on each command:
 
@@ -140,14 +140,14 @@ These options are available on each command:
 | `--api-key`, `-k` | `PORKBUN_API_KEY` | Porkbun API key |
 | `--secret-key`, `-s` | `PORKBUN_SECRET_KEY` | Porkbun secret key |
 
-## Exit Codes
+## 🚦 Exit Codes
 
 | Code | Meaning |
 |------|---------|
 | 0 | Success |
 | 1 | Error (authentication, validation, API error) |
 
-## Shell Completion
+## 🐚 Shell Completion
 
 Generate shell completions for your shell:
 

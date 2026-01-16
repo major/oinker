@@ -1,4 +1,4 @@
-# SSL
+# 🔒 SSL
 
 SSL certificate retrieval operations.
 

@@ -1,4 +1,4 @@
-# Domains
+# 🌐 Domains
 
 Domain management operations and types.
 

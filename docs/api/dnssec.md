@@ -1,4 +1,4 @@
-# DNSSEC
+# 🔐 DNSSEC
 
 DNSSEC (DNS Security Extensions) management operations and types.
 

@@ -1,4 +1,4 @@
-# DNS
+# 📝 DNS
 
 DNS record management operations and types.
 

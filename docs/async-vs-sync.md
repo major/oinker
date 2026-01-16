@@ -1,8 +1,8 @@
-# Async vs Sync
+# 🔄 Async vs Sync
 
 Oinker provides two client classes: `AsyncPiglet` (async) and `Piglet` (sync). This guide helps you choose the right one.
 
-## Quick Decision
+## ⚡ Quick Decision
 
 | Use Case | Recommended |
 |----------|-------------|
@@ -13,7 +13,7 @@ Oinker provides two client classes: `AsyncPiglet` (async) and `Piglet` (sync). T
 | High-throughput batch operations | `AsyncPiglet` |
 | Simple automation scripts | `Piglet` |
 
-## AsyncPiglet (Async)
+## 🚀 AsyncPiglet (Async)
 
 The async client is the **primary implementation**. It's built on httpx and provides full async/await support.
 
@@ -75,7 +75,7 @@ async def list_records(domain: str, piglet: AsyncPiglet = Depends(get_piglet)):
     return await piglet.dns.list(domain)
 ```
 
-## Piglet (Sync)
+## 🐷 Piglet (Sync)
 
 The sync client wraps `AsyncPiglet` for use in synchronous code. It manages its own event loop internally.
 
@@ -108,7 +108,7 @@ finally:
     piglet.close()
 ```
 
-## API Parity
+## ✨ API Parity
 
 Both clients have identical APIs. The only difference is `async`/`await`:
 
@@ -130,7 +130,7 @@ Both clients have identical APIs. The only difference is `async`/`await`:
         piglet.dns.delete("example.com", record_id=record_id)
     ```
 
-## Performance Comparison
+## 📊 Performance Comparison
 
 For single operations, both clients perform similarly. The async client's advantage appears with concurrent operations:
 
@@ -140,7 +140,7 @@ For single operations, both clients perform similarly. The async client's advant
 | 10 sequential lookups | ~1000ms | ~1000ms |
 | 10 concurrent lookups | ~1000ms | ~200ms |
 
-## Common Pitfalls
+## ⚠️ Common Pitfalls
 
 ### Don't Mix Async and Sync
 

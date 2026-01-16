@@ -1,6 +1,6 @@
-# Oinker
+# 🐷 Oinker
 
-> *DNS management that doesn't stink!*
+> *DNS management that doesn't stink!* 🐽
 
 A delightfully Pythonic library for managing DNS at [Porkbun](https://porkbun.com). Async-first with sync wrappers, type-safe, and thoroughly tested.
 
@@ -12,14 +12,14 @@ A delightfully Pythonic library for managing DNS at [Porkbun](https://porkbun.co
 
 ## Features
 
-- **Async-first design** - Built on httpx for modern async/await support
-- **Type-safe records** - Dataclasses with validation for all DNS record types
-- **Sync wrappers** - Use `Piglet` when you don't need async
-- **CLI included** - Manage DNS from the command line
-- **Auto-retry** - Exponential backoff for transient failures
-- **Python 3.13+** - Modern Python with full type annotations
+- 🚀 **Async-first design** - Built on httpx for modern async/await support
+- 🔒 **Type-safe records** - Dataclasses with validation for all DNS record types
+- 🔄 **Sync wrappers** - Use `Piglet` when you don't need async
+- 💻 **CLI included** - Manage DNS from the command line
+- 🔁 **Auto-retry** - Exponential backoff for transient failures
+- 🐍 **Python 3.13+** - Modern Python with full type annotations
 
-## Installation
+## 📦 Installation
 
 ```bash
 pip install oinker
@@ -31,7 +31,7 @@ For CLI support:
 pip install "oinker[cli]"
 ```
 
-## Quick Start
+## 🚀 Quick Start
 
 Set your Porkbun API credentials:
 
@@ -103,7 +103,7 @@ $ oinker dns delete example.com --id 123458
 🐷 Gobbled up record 123458
 ```
 
-## DNS Record Types
+## 📝 DNS Record Types
 
 Oinker provides type-safe dataclasses for all Porkbun-supported record types:
 
@@ -136,7 +136,7 @@ except ValidationError as e:
     print(e)  # Invalid IPv4 address: not-an-ip
 ```
 
-## Domain Operations
+## 🌐 Domain Operations
 
 ```python
 async with AsyncPiglet() as piglet:
@@ -157,7 +157,7 @@ async with AsyncPiglet() as piglet:
     availability = await piglet.domains.check("example.com")
 ```
 
-## DNSSEC
+## 🔐 DNSSEC
 
 ```python
 from oinker import DNSSECRecordCreate
@@ -175,7 +175,7 @@ async with AsyncPiglet() as piglet:
     ))
 ```
 
-## SSL Certificates
+## 🔒 SSL Certificates
 
 ```python
 async with AsyncPiglet() as piglet:
@@ -184,7 +184,7 @@ async with AsyncPiglet() as piglet:
     print(bundle.private_key)
 ```
 
-## Error Handling
+## ⚠️ Error Handling
 
 ```python
 from oinker import (
@@ -208,10 +208,10 @@ async with AsyncPiglet() as piglet:
         print(f"API error: {e}")
 ```
 
-## Documentation
+## 📚 Documentation
 
 Full documentation is available at [https://major.github.io/oinker](https://major.github.io/oinker/).
 
-## License
+## 📄 License
 
 MIT

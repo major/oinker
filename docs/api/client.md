@@ -1,4 +1,4 @@
-# Client
+# 🐷 Client
 
 The main entry points for the Oinker library.
 

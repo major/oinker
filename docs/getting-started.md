@@ -1,8 +1,8 @@
-# Getting Started
+# 🐷 Getting Started
 
 This guide will walk you through installing Oinker and making your first API calls.
 
-## Installation
+## 📦 Installation
 
 Install Oinker using pip:
 
@@ -26,7 +26,7 @@ uv add oinker
 uv add "oinker[cli]"
 ```
 
-## Getting API Credentials
+## 🔑 Getting API Credentials
 
 1. Log in to your [Porkbun account](https://porkbun.com/)
 2. Go to **Account** → **API Access**
@@ -37,7 +37,7 @@ uv add "oinker[cli]"
     You must explicitly enable API access for each domain in your Porkbun dashboard.
     Go to the domain's management page and toggle "API Access" to enabled.
 
-## Configuration
+## ⚙️ Configuration
 
 ### Environment Variables (Recommended)
 
@@ -64,7 +64,7 @@ async with AsyncPiglet(
     ...
 ```
 
-## Your First Request
+## 🚀 Your First Request
 
 Let's verify your credentials work by calling the ping endpoint:
 
@@ -98,7 +98,7 @@ Let's verify your credentials work by calling the ping endpoint:
     oinker ping
     ```
 
-## Working with DNS Records
+## 📝 Working with DNS Records
 
 ### List Records
 
@@ -171,7 +171,7 @@ await piglet.dns.delete_by_name_type(
 )
 ```
 
-## Error Handling
+## ⚠️ Error Handling
 
 Oinker raises specific exceptions for different error types:
 
@@ -200,7 +200,7 @@ async with AsyncPiglet() as piglet:
         print(f"API error: {e}")
 ```
 
-## Next Steps
+## 📚 Next Steps
 
 - [Async vs Sync](async-vs-sync.md) - Learn when to use each client
 - [CLI Reference](cli.md) - Manage DNS from the command line
