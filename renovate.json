@@ -10,29 +10,48 @@
     ":automergeDigest",
     "group:allNonMajor"
   ],
-  "labels": ["dependencies"],
+  "labels": [
+    "dependencies"
+  ],
   "packageRules": [
     {
       "description": "Group all dev dependency updates",
-      "matchDepTypes": ["devDependencies"],
+      "matchDepTypes": [
+        "devDependencies"
+      ],
       "groupName": "dev dependencies"
     },
     {
       "description": "Automerge non-major updates for trusted packages",
-      "matchPackageNames": ["ruff", "pytest", "pytest-cov", "pytest-asyncio", "mkdocs*", "ty"],
+      "matchPackageNames": [
+        "ruff",
+        "pytest",
+        "pytest-cov",
+        "pytest-asyncio",
+        "mkdocs*",
+        "ty"
+      ],
       "automerge": true
     },
     {
       "description": "Require approval for major updates",
-      "matchUpdateTypes": ["major"],
+      "matchUpdateTypes": [
+        "major"
+      ],
       "automerge": false
     }
   ],
   "pip_requirements": {
-    "fileMatch": ["requirements.*\\.txt$"]
+    "managerFilePatterns": [
+      "/requirements.*\\.txt$/"
+    ]
   },
   "pep621": {
-    "fileMatch": ["pyproject\\.toml$"]
+    "managerFilePatterns": [
+      "/pyproject\\.toml$/"
+    ]
   },
-  "schedule": ["before 6am on monday"]
+  "schedule": [
+    "before 6am on monday"
+  ]
 }
