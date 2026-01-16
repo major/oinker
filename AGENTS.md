@@ -41,10 +41,22 @@ src/oinker/
 ├── _config.py           # Configuration and auth
 ├── _exceptions.py       # Exception hierarchy
 ├── _types.py            # Shared dataclasses
-└── dns/
-    ├── _api.py          # AsyncDNSAPI operations
-    ├── _sync.py         # SyncDNSAPI wrapper
-    └── _records.py      # DNS record dataclasses
+├── dns/
+│   ├── _api.py          # AsyncDNSAPI operations
+│   ├── _sync.py         # SyncDNSAPI wrapper
+│   └── _records.py      # DNS record dataclasses
+├── dnssec/
+│   ├── _api.py          # AsyncDNSSECAPI operations
+│   ├── _sync.py         # SyncDNSSECAPI wrapper
+│   └── _types.py        # DNSSEC record dataclasses
+├── domains/
+│   ├── _api.py          # AsyncDomainsAPI operations
+│   ├── _sync.py         # SyncDomainsAPI wrapper
+│   └── _types.py        # Domain dataclasses
+└── ssl/
+    ├── _api.py          # AsyncSSLAPI operations
+    ├── _sync.py         # SyncSSLAPI wrapper
+    └── _types.py        # SSL bundle dataclass
 ```
 
 ## Code Style
