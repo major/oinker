@@ -2,19 +2,14 @@
 
 from __future__ import annotations
 
-from typing import Any
 from unittest.mock import AsyncMock
 
-import httpx
 import pytest
+from conftest import make_response
 
 from oinker import AsyncPiglet, Piglet
 from oinker._config import OinkerConfig
 from oinker._exceptions import AuthenticationError, NotFoundError
-
-
-def make_response(data: dict[str, Any], status_code: int = 200) -> httpx.Response:
-    return httpx.Response(status_code, json=data)
 
 
 class TestAsyncSSLAPIRetrieve:

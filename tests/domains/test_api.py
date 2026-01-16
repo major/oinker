@@ -2,32 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Any
 from unittest.mock import AsyncMock
 
-import httpx
-import pytest
+from conftest import make_response
 
 from oinker import AsyncPiglet, Piglet
 from oinker._config import OinkerConfig
 from oinker.domains import URLForwardCreate
-
-
-@pytest.fixture
-def mock_httpx_client() -> AsyncMock:
-    """Mock httpx.AsyncClient for testing."""
-    return AsyncMock(spec=httpx.AsyncClient)
-
-
-@pytest.fixture
-def config() -> OinkerConfig:
-    """Test configuration with credentials."""
-    return OinkerConfig(api_key="pk1_test", secret_key="sk1_test")
-
-
-def make_response(data: dict[str, Any], status_code: int = 200) -> httpx.Response:
-    """Create a mock httpx.Response."""
-    return httpx.Response(status_code, json=data)
 
 
 class TestAsyncDomainsAPIList:
