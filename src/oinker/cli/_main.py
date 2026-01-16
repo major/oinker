@@ -8,8 +8,10 @@ import typer
 
 from oinker import OinkerError
 from oinker.cli._dns import dns_app
+from oinker.cli._dnssec import dnssec_app
 from oinker.cli._domains import domains_app
 from oinker.cli._pricing import pricing_app
+from oinker.cli._ssl import ssl_app
 from oinker.cli._utils import console, err_console, get_client
 
 app = typer.Typer(
@@ -20,8 +22,10 @@ app = typer.Typer(
 
 # Register subcommands
 app.add_typer(dns_app, name="dns")
+app.add_typer(dnssec_app, name="dnssec")
 app.add_typer(domains_app, name="domains")
 app.add_typer(pricing_app, name="pricing")
+app.add_typer(ssl_app, name="ssl")
 
 
 @app.command()
