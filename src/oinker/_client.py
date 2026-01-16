@@ -18,6 +18,7 @@ from oinker._config import (
 from oinker._http import HttpClient
 from oinker._types import PingResponse
 from oinker.dns._api import AsyncDNSAPI
+from oinker.domains._api import AsyncDomainsAPI
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -71,6 +72,7 @@ class AsyncPiglet:
         )
         self._http = HttpClient(self._config, client=_http_client)
         self._dns = AsyncDNSAPI(self._http)
+        self._domains = AsyncDomainsAPI(self._http)
 
     @property
     def dns(self) -> AsyncDNSAPI:
@@ -80,6 +82,15 @@ class AsyncPiglet:
             AsyncDNSAPI instance for DNS management.
         """
         return self._dns
+
+    @property
+    def domains(self) -> AsyncDomainsAPI:
+        """Access domain operations.
+
+        Returns:
+            AsyncDomainsAPI instance for domain management.
+        """
+        return self._domains
 
     async def __aenter__(self) -> AsyncPiglet:
         """Enter async context manager."""

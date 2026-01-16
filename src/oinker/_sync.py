@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING, Any, TypeVar
 from oinker._client import AsyncPiglet
 from oinker._types import PingResponse
 from oinker.dns._sync import SyncDNSAPI
+from oinker.domains._sync import SyncDomainsAPI
 
 if TYPE_CHECKING:
     import httpx
@@ -70,6 +71,7 @@ class Piglet:
         )
         self._loop: asyncio.AbstractEventLoop | None = None
         self._dns: SyncDNSAPI | None = None
+        self._domains: SyncDomainsAPI | None = None
 
     @property
     def dns(self) -> SyncDNSAPI:
@@ -77,6 +79,13 @@ class Piglet:
         if self._dns is None:
             self._dns = SyncDNSAPI(self._async_client.dns, self._run)
         return self._dns
+
+    @property
+    def domains(self) -> SyncDomainsAPI:
+        """Access domain operations."""
+        if self._domains is None:
+            self._domains = SyncDomainsAPI(self._async_client.domains, self._run)
+        return self._domains
 
     def _get_loop(self) -> asyncio.AbstractEventLoop:
         """Get or create an event loop for running async code."""
