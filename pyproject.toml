@@ -77,3 +77,12 @@ exclude_lines = [
 
 [tool.ty.environment]
 python-version = "3.13"
+python-platform = "linux"
+extra-paths = ["src"]
+
+[tool.pyright]
+pythonVersion = "3.13"
+pythonPlatform = "Linux"
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "standard"

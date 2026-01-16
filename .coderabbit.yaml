@@ -1,11 +1,19 @@
-# CodeRabbit Configuration for linux-mcp-server
+# CodeRabbit Configuration for oinker
 # Docs: https://docs.coderabbit.ai/configuration/
 
 language: en-US
 tone_instructions: >
-  You are a brilliant but world-weary senior developer who has seen too much.
-  Deliver feedback with dry wit and gentle sarcasm, but always be helpful.
-  Use programming puns when the opportunity arises.
+  Apply Charlie Munger's "Invert, always invert" principle to code reviews.
+  Instead of asking "Is this code good?", ask "What would make this code fail?"
+  
+  Focus on avoiding failure rather than achieving brilliance:
+  - What edge cases would break this?
+  - What would cause this to fail in production?
+  - What would make this unmaintainable in 6 months?
+  - What security holes does this open?
+  
+  Be direct and helpful. Skip the pleasantries. When something could fail,
+  explain HOW it would fail and suggest the prevention.
 
 reviews:
   profile: chill
@@ -39,69 +47,138 @@ reviews:
     - "!**/uv.lock"
 
   path_instructions:
-    - path: "src/**/*.py"
-      # NOTE(major): Adjust the read-only line at the top when
-      # write operations are allowed.
+    - path: "src/oinker/**/*.py"
       instructions: |
-        Focus on security and architecture:
-        - CRITICAL: All operations MUST be read-only. Flag any write operations.
-        - Check for TOCTOU race conditions (use try-except, not check-then-use)
-        - psutil exceptions pattern: except (psutil.NoSuchProcess, psutil.AccessDenied)
-        - Verify async/await patterns (no blocking calls in async functions)
-        - Ensure proper exception handling with graceful degradation
-        - Error messages must be clear enough for LLMs to understand and act on
-        - Check input validation before shell commands (command injection)
-        - Verify MCP decorator order: @mcp.tool, @log_tool_call, @disallow_local_execution_in_containers
-        - Host parameter pattern: host: Host | None = None (supports local and remote)
-        - Resource cleanup: Verify SSH connections use context managers
-        - Timeout handling: All network/SSH operations must have timeouts
-        - Container safety: Flag operations that won't work in containers without explicit checks
-        - Don't nitpick style (ruff handles) or types (pyright validates)
+        Oinker: Async-first Porkbun DNS client library. Python 3.13+.
+        
+        INVERSION CHECKLIST - What would cause this to fail?
+        
+        Architecture failures to prevent:
+        - Blocking calls in async functions (use httpx, not requests)
+        - Missing context manager cleanup (__aexit__ must close resources)
+        - Sync wrappers not using loop.run_until_complete() correctly
+        
+        API design failures to prevent:
+        - Breaking the async-first pattern (core logic must be async)
+        - Inconsistent naming (methods: snake_case, classes: PascalCase)
+        - Missing type hints (full annotations required, avoid Any)
+        - Pydantic usage (prefer dataclasses with frozen=True, slots=True)
+        
+        HTTP/Network failures to prevent:
+        - Missing retry logic for transient failures
+        - No timeout on HTTP requests
+        - Swallowing exceptions instead of re-raising with context
+        - Not preserving exception chains (use "from e")
+        
+        Validation failures to prevent:
+        - Records accepting invalid data (validate in __post_init__)
+        - TTL below 600 seconds (Porkbun minimum)
+        - Invalid IP addresses passing through
+        
+        Exception handling failures to prevent:
+        - Generic except clauses hiding real errors
+        - Error messages too vague for debugging
+        - Not using the OinkerError hierarchy
+        
+        Don't nitpick: ruff handles style, ty handles types.
 
-    - path: "src/**/config.py"
+    - path: "src/oinker/_http.py"
       instructions: |
-        Configuration validation:
-        - Centralize derived config logic (defaults, path resolution) in config class
-        - Validate environment variables at startup, not lazily
-        - Check for secure defaults
+        HTTP layer with retry logic. Critical for reliability.
+        
+        INVERSION: What would cause network operations to fail?
+        - No exponential backoff on retries
+        - Retrying non-idempotent operations
+        - Missing timeout configuration
+        - Not handling httpx.ConnectError, httpx.TimeoutException
+        - Rate limit responses (429) not surfaced as RateLimitError
 
-    - path: "src/**/connection/*.py"
+    - path: "src/oinker/_config.py"
       instructions: |
-        SSH/connection handling:
-        - All SSH operations must have timeouts
-        - Prefer library-native async features (asyncssh timeout param) over wrappers (asyncio.wait_for)
-        - Connection errors must include host information for debugging
-        - Resource cleanup: Use context managers for all connections
-        - Key handling: No plaintext passwords, only key-based auth
+        Configuration and authentication handling.
+        
+        INVERSION: What would cause auth to fail?
+        - Credentials not loaded from environment when not provided
+        - No validation that both api_key and secret_key are present
+        - Sensitive data logged or exposed in exceptions
+
+    - path: "src/oinker/_exceptions.py"
+      instructions: |
+        Exception hierarchy inheriting from OinkerError.
+        
+        INVERSION: What would make error handling fail?
+        - Exceptions not inheriting from OinkerError (breaks catch-all)
+        - Missing context in error messages
+        - RateLimitError without retry_after attribute
+
+    - path: "src/oinker/dns/**/*.py"
+      instructions: |
+        DNS record management - the core feature.
+        
+        INVERSION: What would cause DNS operations to fail?
+        - Record dataclasses not validating content on init
+        - IPv4/IPv6 addresses not validated
+        - ClassVar[DNSRecordType] not set on record classes
+        - from_api_response() not handling missing/malformed fields
+        - Priority validation missing for MX/SRV records
 
     - path: "tests/**/*.py"
       instructions: |
-        Focus on test quality and meaningfulness:
-        - Tests should verify behavior, not just chase coverage. A test that doesn't assert meaningful outcomes is worse than no test.
-        - Prefer parameterized tests over duplicate test functions
-        - Mock specs should be provided: AsyncMock(spec=SomeClass)
-        - Use pytest.raises with nullcontext() pattern, not boolean flags
-        - Use fixtures for reusable test components, not helper functions
-        - Check for edge cases: process disappearing, permission denied, empty output
-        - Verify both local (psutil) and remote (SSH) code paths tested
-        - Don't nitpick coverage percentages (CI enforces 70%+ overall, 100% patch)
+        pytest with pytest-asyncio (asyncio_mode = "auto").
+        
+        INVERSION: What would make these tests meaningless?
+        - Tests that pass but don't assert meaningful outcomes
+        - Mocks without spec= (won't catch attribute errors)
+        - Missing edge cases: empty responses, network errors, invalid data
+        - Not testing both success and failure paths
+        - Parameterized tests with boolean flags instead of nullcontext()/pytest.raises()
+        
+        Pattern to follow:
+        ```python
+        @pytest.mark.parametrize(("input", "valid"), [("good", True), ("bad", False)])
+        def test_validation(self, input: str, valid: bool) -> None:
+            expectation = nullcontext() if valid else pytest.raises(ValidationError)
+            with expectation:
+                SomeRecord(content=input)
+        ```
+
+    - path: "tests/conftest.py"
+      instructions: |
+        Shared pytest fixtures.
+        
+        INVERSION: What would make fixtures unreliable?
+        - Fixtures without proper cleanup
+        - AsyncMock without spec=httpx.AsyncClient
+        - Fixtures returning mutable state shared across tests
 
     - path: "pyproject.toml"
       instructions: |
-        Check dependency versions and configuration consistency.
-        Dev tools: uv (package manager), ruff (linting/formatting), pyright (type checking), pytest (testing).
+        Project configuration. Uses uv, ruff, ty, pytest.
+        
+        INVERSION: What would break the build/test cycle?
+        - Missing dev dependencies
+        - Incompatible version constraints
+        - pytest-asyncio missing asyncio_mode = "auto"
+        - Coverage excluding important paths
 
     - path: ".github/workflows/**"
-      instructions: "Validate workflow syntax and security (no secrets in logs)"
+      instructions: |
+        CI/CD workflows.
+        
+        INVERSION: What would cause CI to give false confidence?
+        - Not testing all supported Python versions (3.13, 3.14)
+        - Missing typecheck step (ty check)
+        - Secrets exposed in logs
+        - Caching that hides dependency issues
 
     - path: "Makefile"
       instructions: |
-        Makefile validation:
-        - .PHONY declarations for all non-file targets
-        - Avoid flags that are already defaults
-
-    - path: "Containerfile"
-      instructions: "Use Podman + Containerfile conventions (not Docker + Dockerfile)"
+        Build automation. All commands use "uv run".
+        
+        INVERSION: What would make the Makefile unreliable?
+        - Missing .PHONY declarations
+        - Commands that fail silently
+        - Inconsistency between Makefile and CI commands
 
 chat:
   auto_reply: true
