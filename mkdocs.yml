@@ -1,0 +1,80 @@
+site_name: Oinker
+site_description: A delightfully Pythonic library for managing DNS at Porkbun
+site_url: https://major.github.io/oinker
+repo_url: https://github.com/major/oinker
+repo_name: major/oinker
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: pink
+      accent: pink
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: pink
+      accent: pink
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - content.code.copy
+    - content.code.annotate
+    - navigation.instant
+    - navigation.tracking
+    - navigation.top
+    - search.highlight
+    - search.suggest
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            docstring_style: google
+            merge_init_into_class: true
+            show_signature_annotations: true
+            separate_signature: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.snippets
+  - toc:
+      permalink: true
+  - attr_list
+  - md_in_html
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Async vs Sync: async-vs-sync.md
+  - CLI Reference: cli.md
+  - API Reference:
+      - Client: api/client.md
+      - DNS: api/dns.md
+      - Domains: api/domains.md
+      - DNSSEC: api/dnssec.md
+      - SSL: api/ssl.md
+      - Exceptions: api/exceptions.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/major/oinker
