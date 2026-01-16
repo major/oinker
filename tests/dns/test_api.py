@@ -123,7 +123,7 @@ class TestAsyncDNSAPIGet:
         assert record.id == "123"
         mock_httpx_client.post.assert_called_once()
         call_args = mock_httpx_client.post.call_args
-        assert "/dns/retrieve/example.com/123" in str(call_args)
+        assert call_args.args[0] == "/dns/retrieve/example.com/123"
 
     async def test_get_record_not_found(
         self, mock_httpx_client: AsyncMock, config: OinkerConfig
@@ -173,7 +173,7 @@ class TestAsyncDNSAPIGetByNameType:
         assert len(records) == 1
         assert records[0].name == "www.example.com"
         call_args = mock_httpx_client.post.call_args
-        assert "/dns/retrieveByNameType/example.com/A/www" in str(call_args)
+        assert call_args.args[0] == "/dns/retrieveByNameType/example.com/A/www"
 
     async def test_get_by_name_type_root_domain(
         self, mock_httpx_client: AsyncMock, config: OinkerConfig
@@ -189,8 +189,7 @@ class TestAsyncDNSAPIGetByNameType:
 
         call_args = mock_httpx_client.post.call_args
         # Should NOT have a trailing subdomain
-        assert "/dns/retrieveByNameType/example.com/A" in str(call_args)
-        assert "/dns/retrieveByNameType/example.com/A/" not in str(call_args)
+        assert call_args.args[0] == "/dns/retrieveByNameType/example.com/A"
 
 
 class TestAsyncDNSAPICreate:
@@ -212,7 +211,7 @@ class TestAsyncDNSAPICreate:
 
         assert record_id == "789"
         call_args = mock_httpx_client.post.call_args
-        assert "/dns/create/example.com" in str(call_args)
+        assert call_args.args[0] == "/dns/create/example.com"
 
     async def test_create_mx_record_with_priority(
         self, mock_httpx_client: AsyncMock, config: OinkerConfig
@@ -252,7 +251,7 @@ class TestAsyncDNSAPIEdit:
             await piglet.dns.edit("example.com", "123", ARecord(content="5.6.7.8", name="www"))
 
         call_args = mock_httpx_client.post.call_args
-        assert "/dns/edit/example.com/123" in str(call_args)
+        assert call_args.args[0] == "/dns/edit/example.com/123"
 
 
 class TestAsyncDNSAPIEditByNameType:
@@ -273,7 +272,7 @@ class TestAsyncDNSAPIEditByNameType:
             )
 
         call_args = mock_httpx_client.post.call_args
-        assert "/dns/editByNameType/example.com/A/www" in str(call_args)
+        assert call_args.args[0] == "/dns/editByNameType/example.com/A/www"
         request_json = call_args.kwargs.get("json", {})
         assert request_json.get("content") == "5.6.7.8"
         assert request_json.get("ttl") == "1200"
@@ -328,7 +327,7 @@ class TestAsyncDNSAPIDelete:
             await piglet.dns.delete("example.com", "123")
 
         call_args = mock_httpx_client.post.call_args
-        assert "/dns/delete/example.com/123" in str(call_args)
+        assert call_args.args[0] == "/dns/delete/example.com/123"
 
 
 class TestAsyncDNSAPIDeleteByNameType:
@@ -347,7 +346,7 @@ class TestAsyncDNSAPIDeleteByNameType:
             await piglet.dns.delete_by_name_type("example.com", "A", "www")
 
         call_args = mock_httpx_client.post.call_args
-        assert "/dns/deleteByNameType/example.com/A/www" in str(call_args)
+        assert call_args.args[0] == "/dns/deleteByNameType/example.com/A/www"
 
     async def test_delete_by_name_type_root(
         self, mock_httpx_client: AsyncMock, config: OinkerConfig
@@ -362,7 +361,7 @@ class TestAsyncDNSAPIDeleteByNameType:
             await piglet.dns.delete_by_name_type("example.com", "TXT")
 
         call_args = mock_httpx_client.post.call_args
-        assert "/dns/deleteByNameType/example.com/TXT" in str(call_args)
+        assert call_args.args[0] == "/dns/deleteByNameType/example.com/TXT"
 
 
 class TestRecordToAPIBody:
@@ -483,7 +482,7 @@ class TestSyncDNSAPI:
             piglet.dns.edit("example.com", "123", ARecord(content="5.6.7.8", name="www"))
 
         call_args = mock_httpx_client.post.call_args
-        assert "/dns/edit/example.com/123" in str(call_args)
+        assert call_args.args[0] == "/dns/edit/example.com/123"
 
     def test_sync_delete_record(self, mock_httpx_client: AsyncMock, config: OinkerConfig) -> None:
         mock_httpx_client.post.return_value = make_response({"status": "SUCCESS"})
@@ -494,7 +493,7 @@ class TestSyncDNSAPI:
             piglet.dns.delete("example.com", "123")
 
         call_args = mock_httpx_client.post.call_args
-        assert "/dns/delete/example.com/123" in str(call_args)
+        assert call_args.args[0] == "/dns/delete/example.com/123"
 
     def test_sync_get_by_name_type(
         self, mock_httpx_client: AsyncMock, config: OinkerConfig
@@ -508,7 +507,7 @@ class TestSyncDNSAPI:
 
         assert records == []
         call_args = mock_httpx_client.post.call_args
-        assert "/dns/retrieveByNameType/example.com/A/www" in str(call_args)
+        assert call_args.args[0] == "/dns/retrieveByNameType/example.com/A/www"
 
     def test_sync_edit_by_name_type(
         self, mock_httpx_client: AsyncMock, config: OinkerConfig
@@ -521,7 +520,7 @@ class TestSyncDNSAPI:
             piglet.dns.edit_by_name_type("example.com", "A", "www", content="5.6.7.8")
 
         call_args = mock_httpx_client.post.call_args
-        assert "/dns/editByNameType/example.com/A/www" in str(call_args)
+        assert call_args.args[0] == "/dns/editByNameType/example.com/A/www"
 
     def test_sync_delete_by_name_type(
         self, mock_httpx_client: AsyncMock, config: OinkerConfig
@@ -534,7 +533,7 @@ class TestSyncDNSAPI:
             piglet.dns.delete_by_name_type("example.com", "A", "www")
 
         call_args = mock_httpx_client.post.call_args
-        assert "/dns/deleteByNameType/example.com/A/www" in str(call_args)
+        assert call_args.args[0] == "/dns/deleteByNameType/example.com/A/www"
 
 
 class TestDNSErrorHandling:
