@@ -72,6 +72,7 @@ nav:
       - Domains: api/domains.md
       - DNSSEC: api/dnssec.md
       - SSL: api/ssl.md
+      - Pricing: api/pricing.md
       - Exceptions: api/exceptions.md
 
 extra:

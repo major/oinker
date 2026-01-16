@@ -212,6 +212,10 @@ async with AsyncPiglet() as piglet:
 
 Full documentation is available at [https://major.github.io/oinker](https://major.github.io/oinker/).
 
+## 🐷 Disclaimer
+
+This project is not affiliated with [Porkbun](https://porkbun.com) in any way. It's just a passion project by someone who really, really loves Porkbun. They're amazing! 🐽
+
 ## 📄 License
 
 MIT
