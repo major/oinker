@@ -4,6 +4,8 @@
 
 A delightfully Pythonic library for managing DNS at [Porkbun](https://porkbun.com). Async-first with sync wrappers, type-safe, and thoroughly tested.
 
+**[📚 Full Documentation](https://major.github.io/oinker/)** | **[🐽 Not affiliated with Porkbun](#-disclaimer)**
+
 [![CI](https://github.com/major/oinker/actions/workflows/ci.yml/badge.svg)](https://github.com/major/oinker/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/major/oinker/branch/main/graph/badge.svg)](https://codecov.io/gh/major/oinker)
 [![PyPI version](https://badge.fury.io/py/oinker.svg)](https://pypi.org/project/oinker/)
@@ -210,7 +212,7 @@ async with AsyncPiglet() as piglet:
 
 ## 📚 Documentation
 
-Full documentation is available at [https://major.github.io/oinker](https://major.github.io/oinker/).
+For more examples and detailed API reference, check out the **[full documentation](https://major.github.io/oinker/)**.
 
 ## 🐷 Disclaimer
 
