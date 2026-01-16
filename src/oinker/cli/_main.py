@@ -8,6 +8,7 @@ import typer
 
 from oinker import OinkerError
 from oinker.cli._dns import dns_app
+from oinker.cli._domains import domains_app
 from oinker.cli._utils import console, err_console, get_client
 
 app = typer.Typer(
@@ -18,6 +19,7 @@ app = typer.Typer(
 
 # Register subcommands
 app.add_typer(dns_app, name="dns")
+app.add_typer(domains_app, name="domains")
 
 
 @app.command()
