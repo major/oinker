@@ -210,7 +210,7 @@ async with AsyncPiglet() as piglet:
 
 ## Documentation
 
-Full documentation is available at [major.github.io/oinker](https://major.github.io/oinker).
+Full documentation is available at [https://major.github.io/oinker](https://major.github.io/oinker/).
 
 ## License
 
