@@ -24,6 +24,23 @@ from oinker._exceptions import (
 )
 from oinker._sync import Piglet
 from oinker._types import PingResponse
+from oinker.dns import (
+    AAAARecord,
+    ALIASRecord,
+    ARecord,
+    CAARecord,
+    CNAMERecord,
+    DNSRecord,
+    DNSRecordResponse,
+    HTTPSRecord,
+    MXRecord,
+    NSRecord,
+    SRVRecord,
+    SSHFPRecord,
+    SVCBRecord,
+    TLSARecord,
+    TXTRecord,
+)
 
 __all__ = [
     # Clients
@@ -31,6 +48,22 @@ __all__ = [
     "Piglet",
     # Types
     "PingResponse",
+    # DNS Records
+    "ARecord",
+    "AAAARecord",
+    "MXRecord",
+    "TXTRecord",
+    "CNAMERecord",
+    "ALIASRecord",
+    "NSRecord",
+    "SRVRecord",
+    "TLSARecord",
+    "CAARecord",
+    "HTTPSRecord",
+    "SVCBRecord",
+    "SSHFPRecord",
+    "DNSRecord",
+    "DNSRecordResponse",
     # Exceptions
     "OinkerError",
     "AuthenticationError",
