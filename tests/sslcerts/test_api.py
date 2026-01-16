@@ -5,12 +5,11 @@ from __future__ import annotations
 from unittest.mock import AsyncMock
 
 import pytest
+from conftest import make_response
 
 from oinker import AsyncPiglet, Piglet
 from oinker._config import OinkerConfig
 from oinker._exceptions import AuthenticationError, NotFoundError
-
-from tests.conftest import make_response
 
 
 class TestAsyncSSLAPIRetrieve:

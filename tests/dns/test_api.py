@@ -6,12 +6,11 @@ from typing import Any
 from unittest.mock import AsyncMock
 
 import pytest
+from conftest import make_response
 
 from oinker import ARecord, AsyncPiglet, MXRecord, Piglet, TXTRecord
 from oinker._config import OinkerConfig
 from oinker._exceptions import AuthenticationError, NotFoundError
-
-from tests.conftest import make_response
 
 
 class TestAsyncDNSAPIList:
