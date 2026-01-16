@@ -21,100 +21,61 @@ from oinker._http import HttpClient
 class TestHttpClient:
     """Tests for HttpClient."""
 
-    @pytest.fixture
-    def config(self) -> OinkerConfig:
-        """Test config with minimal retries for fast tests."""
-        return OinkerConfig(
-            api_key="pk1_test",
-            secret_key="sk1_test",
-            max_retries=0,  # No retries for unit tests
-            retry_delay=0.01,
-        )
-
-    @pytest.fixture
-    def mock_client(self) -> AsyncMock:
-        """Mock httpx client."""
-        return AsyncMock(spec=httpx.AsyncClient)
-
-    @pytest.fixture
-    def http_client(self, config: OinkerConfig, mock_client: AsyncMock) -> HttpClient:
-        """HttpClient with mocked transport."""
-        return HttpClient(config, client=mock_client)
-
-    async def test_context_manager(self, config: OinkerConfig) -> None:
+    async def test_context_manager(self, config_no_retry: OinkerConfig) -> None:
         """HttpClient should work as async context manager."""
-        async with HttpClient(config) as client:
+        async with HttpClient(config_no_retry) as client:
             assert client._client is not None
         assert client._client is None
 
     async def test_post_includes_auth(
         self,
-        http_client: HttpClient,
-        mock_client: AsyncMock,
+        http_client_no_retry: HttpClient,
+        mock_httpx_client: AsyncMock,
     ) -> None:
         """POST requests should include authentication."""
-        mock_client.post.return_value = httpx.Response(
+        mock_httpx_client.post.return_value = httpx.Response(
             200, json={"status": "SUCCESS", "data": "test"}
         )
 
-        async with http_client:
-            await http_client.post("/test")
+        async with http_client_no_retry:
+            await http_client_no_retry.post("/test")
 
-        mock_client.post.assert_called_once()
-        call_kwargs = mock_client.post.call_args[1]
-        assert call_kwargs["json"]["apikey"] == "pk1_test"
-        assert call_kwargs["json"]["secretapikey"] == "sk1_test"
+        mock_httpx_client.post.assert_called_once()
+        call_kwargs = mock_httpx_client.post.call_args[1]
+        assert call_kwargs["json"]["apikey"] == "pk1_test_key"
+        assert call_kwargs["json"]["secretapikey"] == "sk1_test_secret"
 
     async def test_post_without_auth(
         self,
-        http_client: HttpClient,
-        mock_client: AsyncMock,
+        http_client_no_retry: HttpClient,
+        mock_httpx_client: AsyncMock,
     ) -> None:
         """POST requests can skip authentication."""
-        mock_client.post.return_value = httpx.Response(200, json={"status": "SUCCESS"})
+        mock_httpx_client.post.return_value = httpx.Response(200, json={"status": "SUCCESS"})
 
-        async with http_client:
-            await http_client.post("/test", authenticated=False)
+        async with http_client_no_retry:
+            await http_client_no_retry.post("/test", authenticated=False)
 
-        call_kwargs = mock_client.post.call_args[1]
+        call_kwargs = mock_httpx_client.post.call_args[1]
         assert "apikey" not in call_kwargs["json"]
 
     async def test_post_with_data(
         self,
-        http_client: HttpClient,
-        mock_client: AsyncMock,
+        http_client_no_retry: HttpClient,
+        mock_httpx_client: AsyncMock,
     ) -> None:
         """POST requests should include additional data."""
-        mock_client.post.return_value = httpx.Response(200, json={"status": "SUCCESS"})
+        mock_httpx_client.post.return_value = httpx.Response(200, json={"status": "SUCCESS"})
 
-        async with http_client:
-            await http_client.post("/test", data={"extra": "data"})
+        async with http_client_no_retry:
+            await http_client_no_retry.post("/test", data={"extra": "data"})
 
-        call_kwargs = mock_client.post.call_args[1]
+        call_kwargs = mock_httpx_client.post.call_args[1]
         assert call_kwargs["json"]["extra"] == "data"
 
 
 class TestHttpClientErrorHandling:
     """Tests for HTTP error handling."""
-
-    @pytest.fixture
-    def config(self) -> OinkerConfig:
-        """Test config with no retries."""
-        return OinkerConfig(
-            api_key="pk1_test",
-            secret_key="sk1_test",
-            max_retries=0,
-        )
-
-    @pytest.fixture
-    def mock_client(self) -> AsyncMock:
-        """Mock httpx client."""
-        return AsyncMock(spec=httpx.AsyncClient)
-
-    @pytest.fixture
-    def http_client(self, config: OinkerConfig, mock_client: AsyncMock) -> HttpClient:
-        """HttpClient with mocked transport."""
-        return HttpClient(config, client=mock_client)
 
     @pytest.mark.parametrize(
         ("status_code", "expected_exception"),
@@ -127,19 +88,19 @@ class TestHttpClientErrorHandling:
     )
     async def test_http_error_codes(
         self,
-        http_client: HttpClient,
-        mock_client: AsyncMock,
+        http_client_no_retry: HttpClient,
+        mock_httpx_client: AsyncMock,
         status_code: int,
         expected_exception: type[Exception],
     ) -> None:
         """HTTP error codes should raise appropriate exceptions."""
-        mock_client.post.return_value = httpx.Response(
+        mock_httpx_client.post.return_value = httpx.Response(
             status_code, json={"status": "ERROR", "message": "Test error"}
         )
 
-        async with http_client:
+        async with http_client_no_retry:
             with pytest.raises(expected_exception):
-                await http_client.post("/test")
+                await http_client_no_retry.post("/test")
 
     @pytest.mark.parametrize(
         ("message", "expected_exception"),
@@ -154,40 +115,40 @@ class TestHttpClientErrorHandling:
     )
     async def test_api_error_messages(
         self,
-        http_client: HttpClient,
-        mock_client: AsyncMock,
+        http_client_no_retry: HttpClient,
+        mock_httpx_client: AsyncMock,
         message: str,
         expected_exception: type[Exception],
     ) -> None:
         """API error messages should map to appropriate exceptions."""
-        mock_client.post.return_value = httpx.Response(
+        mock_httpx_client.post.return_value = httpx.Response(
             200, json={"status": "ERROR", "message": message}
         )
 
-        async with http_client:
+        async with http_client_no_retry:
             with pytest.raises(expected_exception):
-                await http_client.post("/test")
+                await http_client_no_retry.post("/test")
 
     async def test_generic_api_error(
         self,
-        http_client: HttpClient,
-        mock_client: AsyncMock,
+        http_client_no_retry: HttpClient,
+        mock_httpx_client: AsyncMock,
     ) -> None:
         """Unknown API errors should raise APIError."""
-        mock_client.post.return_value = httpx.Response(
+        mock_httpx_client.post.return_value = httpx.Response(
             200, json={"status": "ERROR", "message": "Something unexpected"}
         )
 
-        async with http_client:
+        async with http_client_no_retry:
             with pytest.raises(APIError) as exc_info:
-                await http_client.post("/test")
+                await http_client_no_retry.post("/test")
 
         assert exc_info.value.message == "Something unexpected"
 
     async def test_rate_limit_retry_after(
         self,
-        http_client: HttpClient,
-        mock_client: AsyncMock,
+        http_client_no_retry: HttpClient,
+        mock_httpx_client: AsyncMock,
     ) -> None:
         """RateLimitError should include retry_after from headers."""
         response = httpx.Response(
@@ -195,11 +156,11 @@ class TestHttpClientErrorHandling:
             json={"status": "ERROR", "message": "Rate limited"},
             headers={"Retry-After": "30"},
         )
-        mock_client.post.return_value = response
+        mock_httpx_client.post.return_value = response
 
-        async with http_client:
+        async with http_client_no_retry:
             with pytest.raises(RateLimitError) as exc_info:
-                await http_client.post("/test")
+                await http_client_no_retry.post("/test")
 
         assert exc_info.value.retry_after == 30.0
 

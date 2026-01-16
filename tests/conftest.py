@@ -65,6 +65,12 @@ def http_client(config: OinkerConfig, mock_httpx_client: AsyncMock) -> HttpClien
 
 
 @pytest.fixture
+def http_client_no_retry(config_no_retry: OinkerConfig, mock_httpx_client: AsyncMock) -> HttpClient:
+    """HttpClient with mocked transport and no retries for fast unit tests."""
+    return HttpClient(config_no_retry, client=mock_httpx_client)
+
+
+@pytest.fixture
 def success_response() -> dict[str, Any]:
     """Successful API response."""
     return {"status": "SUCCESS", "yourIp": "203.0.113.42"}
