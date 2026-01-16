@@ -51,6 +51,7 @@ from oinker.domains import (
     URLForward,
     URLForwardCreate,
 )
+from oinker.pricing import TLDPricing, get_pricing, get_pricing_sync
 from oinker.ssl import SSLBundle
 
 __all__ = [
@@ -88,6 +89,10 @@ __all__ = [
     "DNSSECRecordCreate",
     # SSL Types
     "SSLBundle",
+    # Pricing
+    "TLDPricing",
+    "get_pricing",
+    "get_pricing_sync",
     # Exceptions
     "OinkerError",
     "AuthenticationError",
