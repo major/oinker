@@ -2,28 +2,19 @@
 # Docs: https://docs.coderabbit.ai/configuration/
 
 language: en-US
-tone_instructions: >
-  Apply Charlie Munger's "Invert, always invert" principle to code reviews.
-  Instead of asking "Is this code good?", ask "What would make this code fail?"
-  
-  Focus on avoiding failure rather than achieving brilliance:
-  - What edge cases would break this?
-  - What would cause this to fail in production?
-  - What would make this unmaintainable in 6 months?
-  - What security holes does this open?
-  
-  Be direct and helpful. Skip the pleasantries. When something could fail,
-  explain HOW it would fail and suggest the prevention.
+tone_instructions: |
+  Invert: Ask "What would make this fail?" not "Is this good?" Be direct.
+  Explain failure modes and suggest prevention.
 
 reviews:
-  profile: chill
-  collapse_walkthrough: true
+  profile: assertive
+  collapse_walkthrough: false
   poem: false
   request_changes_workflow: false
-  high_level_summary: false
+  high_level_summary: true
   high_level_summary_placeholder: "@coderabbitai summary"
   abort_on_close: true
-  review_status: false
+  review_status: true
 
   auto_review:
     enabled: false
@@ -50,42 +41,42 @@ reviews:
     - path: "src/oinker/**/*.py"
       instructions: |
         Oinker: Async-first Porkbun DNS client library. Python 3.13+.
-        
+
         INVERSION CHECKLIST - What would cause this to fail?
-        
+
         Architecture failures to prevent:
         - Blocking calls in async functions (use httpx, not requests)
         - Missing context manager cleanup (__aexit__ must close resources)
         - Sync wrappers not using loop.run_until_complete() correctly
-        
+
         API design failures to prevent:
         - Breaking the async-first pattern (core logic must be async)
         - Inconsistent naming (methods: snake_case, classes: PascalCase)
         - Missing type hints (full annotations required, avoid Any)
         - Pydantic usage (prefer dataclasses with frozen=True, slots=True)
-        
+
         HTTP/Network failures to prevent:
         - Missing retry logic for transient failures
         - No timeout on HTTP requests
         - Swallowing exceptions instead of re-raising with context
         - Not preserving exception chains (use "from e")
-        
+
         Validation failures to prevent:
         - Records accepting invalid data (validate in __post_init__)
         - TTL below 600 seconds (Porkbun minimum)
         - Invalid IP addresses passing through
-        
+
         Exception handling failures to prevent:
         - Generic except clauses hiding real errors
         - Error messages too vague for debugging
         - Not using the OinkerError hierarchy
-        
+
         Don't nitpick: ruff handles style, ty handles types.
 
     - path: "src/oinker/_http.py"
       instructions: |
         HTTP layer with retry logic. Critical for reliability.
-        
+
         INVERSION: What would cause network operations to fail?
         - No exponential backoff on retries
         - Retrying non-idempotent operations
@@ -96,7 +87,7 @@ reviews:
     - path: "src/oinker/_config.py"
       instructions: |
         Configuration and authentication handling.
-        
+
         INVERSION: What would cause auth to fail?
         - Credentials not loaded from environment when not provided
         - No validation that both api_key and secret_key are present
@@ -105,7 +96,7 @@ reviews:
     - path: "src/oinker/_exceptions.py"
       instructions: |
         Exception hierarchy inheriting from OinkerError.
-        
+
         INVERSION: What would make error handling fail?
         - Exceptions not inheriting from OinkerError (breaks catch-all)
         - Missing context in error messages
@@ -114,7 +105,7 @@ reviews:
     - path: "src/oinker/dns/**/*.py"
       instructions: |
         DNS record management - the core feature.
-        
+
         INVERSION: What would cause DNS operations to fail?
         - Record dataclasses not validating content on init
         - IPv4/IPv6 addresses not validated
@@ -125,14 +116,14 @@ reviews:
     - path: "tests/**/*.py"
       instructions: |
         pytest with pytest-asyncio (asyncio_mode = "auto").
-        
+
         INVERSION: What would make these tests meaningless?
         - Tests that pass but don't assert meaningful outcomes
         - Mocks without spec= (won't catch attribute errors)
         - Missing edge cases: empty responses, network errors, invalid data
         - Not testing both success and failure paths
         - Parameterized tests with boolean flags instead of nullcontext()/pytest.raises()
-        
+
         Pattern to follow:
         ```python
         @pytest.mark.parametrize(("input", "valid"), [("good", True), ("bad", False)])
@@ -145,7 +136,7 @@ reviews:
     - path: "tests/conftest.py"
       instructions: |
         Shared pytest fixtures.
-        
+
         INVERSION: What would make fixtures unreliable?
         - Fixtures without proper cleanup
         - AsyncMock without spec=httpx.AsyncClient
@@ -154,7 +145,7 @@ reviews:
     - path: "pyproject.toml"
       instructions: |
         Project configuration. Uses uv, ruff, ty, pytest.
-        
+
         INVERSION: What would break the build/test cycle?
         - Missing dev dependencies
         - Incompatible version constraints
@@ -164,7 +155,7 @@ reviews:
     - path: ".github/workflows/**"
       instructions: |
         CI/CD workflows.
-        
+
         INVERSION: What would cause CI to give false confidence?
         - Not testing all supported Python versions (3.13, 3.14)
         - Missing typecheck step (ty check)
@@ -174,7 +165,7 @@ reviews:
     - path: "Makefile"
       instructions: |
         Build automation. All commands use "uv run".
-        
+
         INVERSION: What would make the Makefile unreliable?
         - Missing .PHONY declarations
         - Commands that fail silently
