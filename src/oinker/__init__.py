@@ -41,6 +41,15 @@ from oinker.dns import (
     TLSARecord,
     TXTRecord,
 )
+from oinker.domains import (
+    DomainAvailability,
+    DomainInfo,
+    DomainLabel,
+    DomainPricing,
+    GlueRecord,
+    URLForward,
+    URLForwardCreate,
+)
 
 __all__ = [
     # Clients
@@ -64,6 +73,14 @@ __all__ = [
     "SSHFPRecord",
     "DNSRecord",
     "DNSRecordResponse",
+    # Domain Types
+    "DomainInfo",
+    "DomainLabel",
+    "DomainAvailability",
+    "DomainPricing",
+    "URLForward",
+    "URLForwardCreate",
+    "GlueRecord",
     # Exceptions
     "OinkerError",
     "AuthenticationError",
