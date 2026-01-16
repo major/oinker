@@ -8,6 +8,7 @@ import typer
 from rich.console import Console
 
 from oinker import OinkerError, Piglet
+from oinker.cli._dns import dns_app
 
 app = typer.Typer(
     name="oinker",
@@ -16,6 +17,9 @@ app = typer.Typer(
 )
 console = Console()
 err_console = Console(stderr=True)
+
+# Register subcommands
+app.add_typer(dns_app, name="dns")
 
 
 def _get_client(api_key: str | None = None, secret_key: str | None = None) -> Piglet:
