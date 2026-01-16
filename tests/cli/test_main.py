@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 
 from typer.testing import CliRunner
 
-from oinker import AuthenticationError, PingResponse
+from oinker import AuthenticationError, Piglet, PingResponse
 from oinker.cli._main import app
 
 runner = CliRunner()
@@ -17,12 +17,12 @@ class TestPingCommand:
 
     def test_ping_success(self) -> None:
         """ping should display success message and IP on valid credentials."""
-        mock_client = MagicMock()
+        mock_client = MagicMock(spec=Piglet)
         mock_client.ping.return_value = PingResponse(your_ip="203.0.113.42")
         mock_client.__enter__ = MagicMock(return_value=mock_client)
         mock_client.__exit__ = MagicMock(return_value=None)
 
-        with patch("oinker.cli._main.Piglet", return_value=mock_client):
+        with patch("oinker.cli._utils.Piglet", return_value=mock_client):
             result = runner.invoke(app, ["ping"])
 
         assert result.exit_code == 0
@@ -31,12 +31,12 @@ class TestPingCommand:
 
     def test_ping_auth_error(self) -> None:
         """ping should show error message on authentication failure."""
-        mock_client = MagicMock()
+        mock_client = MagicMock(spec=Piglet)
         mock_client.ping.side_effect = AuthenticationError("Invalid credentials")
         mock_client.__enter__ = MagicMock(return_value=mock_client)
         mock_client.__exit__ = MagicMock(return_value=None)
 
-        with patch("oinker.cli._main.Piglet", return_value=mock_client):
+        with patch("oinker.cli._utils.Piglet", return_value=mock_client):
             result = runner.invoke(app, ["ping"])
 
         assert result.exit_code == 1
@@ -45,12 +45,12 @@ class TestPingCommand:
 
     def test_ping_passes_credentials(self) -> None:
         """ping should pass API key and secret to client."""
-        mock_client = MagicMock()
+        mock_client = MagicMock(spec=Piglet)
         mock_client.ping.return_value = PingResponse(your_ip="1.2.3.4")
         mock_client.__enter__ = MagicMock(return_value=mock_client)
         mock_client.__exit__ = MagicMock(return_value=None)
 
-        with patch("oinker.cli._main.Piglet", return_value=mock_client) as mock_piglet:
+        with patch("oinker.cli._utils.Piglet", return_value=mock_client) as mock_piglet:
             runner.invoke(app, ["ping", "--api-key", "pk1_test", "--secret-key", "sk1_test"])
 
         mock_piglet.assert_called_once_with(api_key="pk1_test", secret_key="sk1_test")

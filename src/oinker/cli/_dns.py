@@ -5,10 +5,10 @@ from __future__ import annotations
 from typing import Annotated
 
 import typer
-from rich.console import Console
 from rich.table import Table
 
-from oinker import OinkerError, Piglet
+from oinker import OinkerError
+from oinker.cli._utils import console, err_console, get_client
 from oinker.dns import AAAARecord, ARecord, CNAMERecord, MXRecord, TXTRecord
 
 dns_app = typer.Typer(
@@ -16,13 +16,6 @@ dns_app = typer.Typer(
     help="Manage DNS records.",
     no_args_is_help=True,
 )
-console = Console()
-err_console = Console(stderr=True)
-
-
-def _get_client(api_key: str | None = None, secret_key: str | None = None) -> Piglet:
-    """Create a Piglet client with optional credentials."""
-    return Piglet(api_key=api_key, secret_key=secret_key)
 
 
 @dns_app.command("list")
@@ -42,7 +35,7 @@ def list_records(
     Shows a table of all records including ID, name, type, content, and TTL.
     """
     try:
-        with _get_client(api_key, secret_key) as client:
+        with get_client(api_key, secret_key) as client:
             records = client.dns.list(domain)
 
         if not records:
@@ -134,7 +127,7 @@ def create_record(
         else:
             record = record_cls(content=content, name=subdomain, ttl=ttl)
 
-        with _get_client(api_key, secret_key) as client:
+        with get_client(api_key, secret_key) as client:
             record_id = client.dns.create(domain, record)
 
         console.print(f"\U0001f437 Squeee! Created record {record_id}")
@@ -178,14 +171,15 @@ def delete_record(
         raise typer.Exit(code=1)
 
     try:
-        with _get_client(api_key, secret_key) as client:
+        with get_client(api_key, secret_key) as client:
             if record_id:
                 client.dns.delete(domain, record_id=record_id)
                 console.print(f"\U0001f437 Gobbled up record {record_id}")
             else:
                 # Delete by type/name - handle @ for root
                 subdomain = "" if name == "@" else (name or "")
-                client.dns.delete_by_name_type(domain, record_type, subdomain)  # type: ignore[arg-type]
+                assert record_type is not None  # Validated at line 166
+                client.dns.delete_by_name_type(domain, record_type, subdomain)
                 console.print(
                     f"\U0001f437 Gobbled up all {record_type} records for "
                     f"{subdomain or 'root'}.{domain}"

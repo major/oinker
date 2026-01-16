@@ -5,26 +5,19 @@ from __future__ import annotations
 from typing import Annotated
 
 import typer
-from rich.console import Console
 
-from oinker import OinkerError, Piglet
+from oinker import OinkerError
 from oinker.cli._dns import dns_app
+from oinker.cli._utils import console, err_console, get_client
 
 app = typer.Typer(
     name="oinker",
     help="\U0001f437 Oinker - Porkbun DNS management that doesn't stink!",
     no_args_is_help=True,
 )
-console = Console()
-err_console = Console(stderr=True)
 
 # Register subcommands
 app.add_typer(dns_app, name="dns")
-
-
-def _get_client(api_key: str | None = None, secret_key: str | None = None) -> Piglet:
-    """Create a Piglet client with optional credentials."""
-    return Piglet(api_key=api_key, secret_key=secret_key)
 
 
 @app.command()
@@ -43,7 +36,7 @@ def ping(
     Verifies your credentials work and shows your public IP address.
     """
     try:
-        with _get_client(api_key, secret_key) as client:
+        with get_client(api_key, secret_key) as client:
             response = client.ping()
         console.print("\U0001f437 Oink! Connected successfully.")
         console.print(f"   Your IP: {response.your_ip}")
