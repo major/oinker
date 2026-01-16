@@ -113,22 +113,87 @@ Output:
 
 ### dns delete
 
-Delete a DNS record by ID.
+Delete a DNS record by ID or by type and name.
 
 ```bash
 oinker dns delete DOMAIN --id RECORD_ID
+oinker dns delete DOMAIN --type TYPE --name SUBDOMAIN
 ```
 
-**Example:**
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `--id`, `-i` | Record ID to delete |
+| `--type`, `-t` | Record type (for delete by type/name) |
+| `--name`, `-n` | Subdomain name (for delete by type/name, use @ for root) |
+
+**Examples:**
 
 ```bash
+# Delete by ID
 oinker dns delete example.com --id 123456
+
+# Delete all A records for www subdomain
+oinker dns delete example.com --type A --name www
+
+# Delete all TXT records at root
+oinker dns delete example.com --type TXT --name @
 ```
 
 Output:
 
 ```text
 🐷 Gobbled up record 123456
+```
+
+## 🌐 Domain Commands
+
+### domains list
+
+List all domains in your account.
+
+```bash
+oinker domains list
+```
+
+Output:
+
+```text
+┌─────────────────┬────────┬────────────┬────────────┬───────────────┐
+│ Domain          │ Status │ Expires    │ Auto-Renew │ WHOIS Privacy │
+├─────────────────┼────────┼────────────┼────────────┼───────────────┤
+│ example.com     │ ACTIVE │ 2025-12-01 │ ✓          │ ✓             │
+│ example.org     │ ACTIVE │ 2025-06-15 │            │ ✓             │
+└─────────────────┴────────┴────────────┴────────────┴───────────────┘
+```
+
+### domains nameservers
+
+Get the authoritative nameservers for a domain.
+
+```bash
+oinker domains nameservers DOMAIN
+```
+
+**Arguments:**
+
+| Argument | Description |
+|----------|-------------|
+| `DOMAIN` | Domain name (e.g., `example.com`) |
+
+**Example:**
+
+```bash
+oinker domains nameservers example.com
+```
+
+Output:
+
+```text
+🐷 Nameservers for example.com:
+   ns1.porkbun.com
+   ns2.porkbun.com
 ```
 
 ## ⚙️ Common Options
