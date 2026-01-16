@@ -21,14 +21,14 @@ DEFAULT_TIMEOUT = 30.0
 
 
 async def get_pricing(
-    timeout: float = DEFAULT_TIMEOUT,
+    request_timeout: float = DEFAULT_TIMEOUT,
 ) -> dict[str, TLDPricing]:
     """Get default domain pricing for all supported TLDs.
 
     This endpoint does not require authentication.
 
     Args:
-        timeout: Request timeout in seconds (default 30).
+        request_timeout: Request timeout in seconds (default 30).
 
     Returns:
         Dictionary mapping TLD names to their pricing information.
@@ -41,7 +41,7 @@ async def get_pricing(
         >>> print(pricing["com"].registration)
         "9.68"
     """
-    async with httpx.AsyncClient(timeout=timeout) as client:
+    async with httpx.AsyncClient(timeout=request_timeout) as client:
         try:
             response = await client.post(PRICING_URL)
         except (httpx.ConnectError, httpx.TimeoutException) as e:
@@ -66,13 +66,13 @@ async def get_pricing(
         }
 
 
-def get_pricing_sync(timeout: float = DEFAULT_TIMEOUT) -> dict[str, TLDPricing]:
+def get_pricing_sync(request_timeout: float = DEFAULT_TIMEOUT) -> dict[str, TLDPricing]:
     """Get default domain pricing for all supported TLDs (synchronous version).
 
     This endpoint does not require authentication.
 
     Args:
-        timeout: Request timeout in seconds (default 30).
+        request_timeout: Request timeout in seconds (default 30).
 
     Returns:
         Dictionary mapping TLD names to their pricing information.
@@ -85,4 +85,4 @@ def get_pricing_sync(timeout: float = DEFAULT_TIMEOUT) -> dict[str, TLDPricing]:
         >>> print(pricing["com"].registration)
         "9.68"
     """
-    return asyncio.get_event_loop().run_until_complete(get_pricing(timeout))
+    return asyncio.get_event_loop().run_until_complete(get_pricing(request_timeout))
