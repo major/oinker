@@ -41,6 +41,11 @@ src/oinker/
 ├── _config.py           # Configuration and auth
 ├── _exceptions.py       # Exception hierarchy
 ├── _types.py            # Shared dataclasses
+├── cli/
+│   ├── __init__.py      # CLI app (typer)
+│   ├── _main.py         # Main commands (ping)
+│   ├── _dns.py          # DNS subcommands
+│   └── _utils.py        # CLI utilities
 ├── dns/
 │   ├── _api.py          # AsyncDNSAPI operations
 │   ├── _sync.py         # SyncDNSAPI wrapper
