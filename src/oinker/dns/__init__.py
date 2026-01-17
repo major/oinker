@@ -23,6 +23,7 @@ from oinker.dns._records import (
     SVCBRecord,
     TLSARecord,
     TXTRecord,
+    create_record,
 )
 from oinker.dns._sync import SyncDNSAPI
 
@@ -50,4 +51,6 @@ __all__ = [
     "DNSRecordResponse",
     "DNS_RECORD_TYPES",
     "DNS_RECORD_CLASSES",
+    # Factory function
+    "create_record",
 ]

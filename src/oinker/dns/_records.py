@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from ipaddress import AddressValueError, IPv4Address, IPv6Address
-from typing import ClassVar, Final, Literal, get_args
+from typing import Any, ClassVar, Final, Literal, get_args
 
 from oinker._exceptions import ValidationError
 
@@ -495,6 +495,63 @@ DNS_RECORD_CLASSES: Final[dict[str, type[DNSRecord]]] = {
     "SVCB": SVCBRecord,
     "SSHFP": SSHFPRecord,
 }
+
+#: Record types that support a priority field.
+_PRIORITY_RECORD_TYPES: Final[frozenset[str]] = frozenset({"MX", "SRV", "HTTPS", "SVCB"})
+
+
+def create_record(
+    record_type: str,
+    content: str,
+    *,
+    name: str | None = None,
+    ttl: int = 600,
+    priority: int | None = None,
+    notes: str | None = None,
+) -> DNSRecord:
+    """Create a DNS record from a type string.
+
+    This factory simplifies record creation when the type is determined at runtime,
+    such as from user input in CLI tools or MCP servers.
+
+    Args:
+        record_type: The record type (A, AAAA, MX, TXT, CNAME, etc.). Case-insensitive.
+        content: Record content (IP address, hostname, text, etc.).
+        name: Subdomain (None for root domain, "*" for wildcard).
+        ttl: Time to live in seconds (minimum 600).
+        priority: Priority for MX, SRV, HTTPS, and SVCB records. Ignored for other types.
+        notes: Optional notes for the record.
+
+    Returns:
+        The appropriate DNSRecord subclass instance (ARecord, MXRecord, etc.).
+
+    Raises:
+        ValidationError: If record_type is unknown or content/params are invalid.
+
+    Example:
+        >>> record = create_record("A", "1.2.3.4", name="www", ttl=3600)
+        >>> record = create_record("MX", "mail.example.com", priority=10)
+        >>> record = create_record("TXT", "v=spf1 include:_spf.google.com ~all")
+    """
+    record_type_upper = record_type.upper()
+    cls = DNS_RECORD_CLASSES.get(record_type_upper)
+    if cls is None:
+        valid_types = ", ".join(sorted(DNS_RECORD_CLASSES.keys()))
+        msg = f"Unknown record type: {record_type}. Valid types: {valid_types}"
+        raise ValidationError(msg)
+
+    kwargs: dict[str, Any] = {"content": content, "ttl": ttl}
+
+    if name is not None:
+        kwargs["name"] = name
+
+    if notes is not None:
+        kwargs["notes"] = notes
+
+    if priority is not None and record_type_upper in _PRIORITY_RECORD_TYPES:
+        kwargs["priority"] = priority
+
+    return cls(**kwargs)
 
 
 @dataclass(frozen=True, slots=True)
