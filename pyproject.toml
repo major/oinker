@@ -1,6 +1,6 @@
 [project]
 name = "oinker"
-version = "0.1.0"
+version = "0.1.1"
 description = "A delightfully Pythonic library for managing DNS at Porkbun"
 readme = "README.md"
 license = "MIT"
