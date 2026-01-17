@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, Any
 
 import httpx
 
+import oinker
 from oinker._config import OinkerConfig
 from oinker._exceptions import (
     APIError,
@@ -54,6 +55,7 @@ class HttpClient:
             self._client = httpx.AsyncClient(
                 base_url=self._config.base_url,
                 timeout=self._config.timeout,
+                headers={"User-Agent": f"oinker/{oinker.__version__}"},
             )
         return self
 
