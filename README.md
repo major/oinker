@@ -1,8 +1,8 @@
 # 🐷 Oinker
 
-> *DNS management that doesn't stink!* 🐽
+> *Domain management that doesn't stink!* 🐽
 
-A delightfully Pythonic library for managing DNS at [Porkbun](https://porkbun.com). Async-first with sync wrappers, type-safe, and thoroughly tested.
+A delightfully Pythonic library for managing domains at [Porkbun](https://porkbun.com). DNS records, DNSSEC, SSL certificates, URL forwarding, and more. Async-first with sync wrappers, type-safe, and thoroughly tested.
 
 **[📚 Full Documentation](https://major.github.io/oinker/)** | **[🐽 Not affiliated with Porkbun](#-disclaimer)**
 

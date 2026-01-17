@@ -27,6 +27,9 @@ theme:
     - content.code.annotate
     - navigation.instant
     - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
     - navigation.top
     - search.highlight
     - search.suggest
@@ -62,9 +65,18 @@ markdown_extensions:
   - md_in_html
 
 nav:
-  - Home: index.md
-  - Getting Started: getting-started.md
-  - Async vs Sync: async-vs-sync.md
+  - Home:
+      - index.md
+      - Getting Started: getting-started.md
+      - Async vs Sync: async-vs-sync.md
+  - Examples:
+      - examples/index.md
+      - DNS Records: examples/dns.md
+      - Domains: examples/domains.md
+      - DNSSEC: examples/dnssec.md
+      - SSL Certificates: examples/ssl.md
+      - Pricing: examples/pricing.md
+      - Dynamic DNS: examples/dynamic-dns.md
   - CLI Reference: cli.md
   - API Reference:
       - Client: api/client.md
