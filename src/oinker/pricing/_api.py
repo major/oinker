@@ -85,4 +85,8 @@ def get_pricing_sync(request_timeout: float = DEFAULT_TIMEOUT) -> dict[str, TLDP
         >>> print(pricing["com"].registration)
         "9.68"
     """
-    return asyncio.get_event_loop().run_until_complete(get_pricing(request_timeout))
+    loop = asyncio.new_event_loop()
+    try:
+        return loop.run_until_complete(get_pricing(request_timeout))
+    finally:
+        loop.close()
