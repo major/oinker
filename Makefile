@@ -1,4 +1,4 @@
-.PHONY: all lint format typecheck test check clean
+.PHONY: all lint format typecheck test check clean complexity
 
 all: check
 
@@ -25,6 +25,16 @@ check: lint format-check typecheck test
 fix:
 	uv run ruff check --fix .
 	uv run ruff format .
+
+complexity:
+	@output=$$(uv run radon cc src/oinker -n D -s); \
+	if [ -n "$$output" ]; then \
+		echo "$$output"; \
+		echo "ERROR: Functions with complexity D or higher found"; \
+		exit 1; \
+	else \
+		echo "Complexity check passed (no D+ functions)"; \
+	fi
 
 clean:
 	rm -rf .pytest_cache .ruff_cache .coverage htmlcov coverage.xml
