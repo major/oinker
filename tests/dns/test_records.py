@@ -394,7 +394,7 @@ class TestCreateRecord:
     def test_priority_ignored_for_non_priority_records(self) -> None:
         record = create_record("A", "1.2.3.4", priority=10)
         assert isinstance(record, ARecord)
-        assert not hasattr(record, "priority") or record.__class__.record_type == "A"
+        assert not hasattr(record, "priority")
 
     def test_priority_applied_to_srv_record(self) -> None:
         record = create_record("SRV", "5 5060 sipserver.example.com", priority=20)
