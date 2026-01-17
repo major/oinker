@@ -7,6 +7,8 @@ from contextlib import nullcontext
 import pytest
 
 from oinker import (
+    DNS_RECORD_CLASSES,
+    DNS_RECORD_TYPES,
     AAAARecord,
     ALIASRecord,
     ARecord,
@@ -301,3 +303,46 @@ class TestDNSRecordResponse:
         record = DNSRecordResponse.from_api_response(data)
         assert record.ttl == expected_ttl
         assert record.priority == expected_prio
+
+
+class TestDNSRecordRegistry:
+    EXPECTED_TYPES = frozenset(
+        [
+            "A",
+            "AAAA",
+            "MX",
+            "CNAME",
+            "ALIAS",
+            "TXT",
+            "NS",
+            "SRV",
+            "TLSA",
+            "CAA",
+            "HTTPS",
+            "SVCB",
+            "SSHFP",
+        ]
+    )
+
+    def test_dns_record_types_contains_all_expected(self) -> None:
+        assert DNS_RECORD_TYPES == self.EXPECTED_TYPES
+
+    def test_dns_record_classes_keys_match_types(self) -> None:
+        assert set(DNS_RECORD_CLASSES.keys()) == DNS_RECORD_TYPES
+
+    def test_each_class_has_matching_record_type(self) -> None:
+        for type_str, cls in DNS_RECORD_CLASSES.items():
+            assert cls.record_type == type_str
+
+    @pytest.mark.parametrize("record_type", list(EXPECTED_TYPES))
+    def test_instantiation_via_registry(self, record_type: str) -> None:
+        cls = DNS_RECORD_CLASSES[record_type]
+        kwargs: dict[str, str | int] = {"content": "test.example.com", "ttl": 600}
+        if hasattr(cls, "priority"):
+            kwargs["priority"] = 10
+        if record_type == "A":
+            kwargs["content"] = "1.2.3.4"
+        elif record_type == "AAAA":
+            kwargs["content"] = "2001:db8::1"
+        record = cls(**kwargs)
+        assert record.record_type == record_type

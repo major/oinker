@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from ipaddress import AddressValueError, IPv4Address, IPv6Address
-from typing import ClassVar, Literal
+from typing import ClassVar, Final, Literal, get_args
 
 from oinker._exceptions import ValidationError
 
@@ -16,6 +16,9 @@ from oinker._exceptions import ValidationError
 DNSRecordType = Literal[
     "A", "AAAA", "MX", "CNAME", "ALIAS", "TXT", "NS", "SRV", "TLSA", "CAA", "HTTPS", "SVCB", "SSHFP"
 ]
+
+#: Valid DNS record type strings for runtime validation.
+DNS_RECORD_TYPES: Final[frozenset[str]] = frozenset(get_args(DNSRecordType))
 
 
 def _validate_ipv4(value: str) -> IPv4Address:
@@ -475,6 +478,23 @@ DNSRecord = (
     | SVCBRecord
     | SSHFPRecord
 )
+
+#: Mapping from record type string to record class for dynamic instantiation.
+DNS_RECORD_CLASSES: Final[dict[str, type[DNSRecord]]] = {
+    "A": ARecord,
+    "AAAA": AAAARecord,
+    "MX": MXRecord,
+    "TXT": TXTRecord,
+    "CNAME": CNAMERecord,
+    "ALIAS": ALIASRecord,
+    "NS": NSRecord,
+    "SRV": SRVRecord,
+    "TLSA": TLSARecord,
+    "CAA": CAARecord,
+    "HTTPS": HTTPSRecord,
+    "SVCB": SVCBRecord,
+    "SSHFP": SSHFPRecord,
+}
 
 
 @dataclass(frozen=True, slots=True)

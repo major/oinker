@@ -5,6 +5,8 @@ Provides type-safe DNS record management.
 
 from oinker.dns._api import AsyncDNSAPI
 from oinker.dns._records import (
+    DNS_RECORD_CLASSES,
+    DNS_RECORD_TYPES,
     AAAARecord,
     ALIASRecord,
     ARecord,
@@ -42,8 +44,10 @@ __all__ = [
     "HTTPSRecord",
     "SVCBRecord",
     "SSHFPRecord",
-    # Type aliases
+    # Type aliases and registries
     "DNSRecord",
     "DNSRecordType",
     "DNSRecordResponse",
+    "DNS_RECORD_TYPES",
+    "DNS_RECORD_CLASSES",
 ]
