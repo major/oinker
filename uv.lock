@@ -493,8 +493,10 @@ dev = [
     { name = "pytest-asyncio" },
     { name = "pytest-cov" },
     { name = "respx" },
+    { name = "rich" },
     { name = "ruff" },
     { name = "ty" },
+    { name = "typer" },
 ]
 
 [package.metadata]
@@ -514,8 +516,10 @@ dev = [
     { name = "pytest-asyncio", specifier = ">=0.25" },
     { name = "pytest-cov", specifier = ">=6" },
     { name = "respx", specifier = ">=0.22" },
+    { name = "rich", specifier = ">=13" },
     { name = "ruff", specifier = ">=0.9" },
     { name = "ty", specifier = ">=0.0.12" },
+    { name = "typer", specifier = ">=0.15" },
 ]
 
 [[package]]
