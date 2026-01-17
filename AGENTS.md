@@ -281,7 +281,7 @@ Oinker uses **Trusted Publishing (OIDC)** - no API tokens needed. PyPI verifies 
 
 ### Prerequisites (one-time setup)
 
-1. **PyPI Trusted Publisher**: Configure at https://pypi.org/manage/account/publishing/
+1. **PyPI Trusted Publisher**: Configure at [PyPI publishing settings](https://pypi.org/manage/account/publishing/)
    - Project name: `oinker`
    - Owner: `major`
    - Repository: `oinker`
@@ -321,7 +321,7 @@ git push && git push --tags
 2. CI runs first (lint, typecheck, test)
 3. If CI passes, `uv build` creates wheel + sdist
 4. `pypa/gh-action-pypi-publish` uploads via OIDC (no tokens!)
-5. Package appears at https://pypi.org/project/oinker/
+5. Package appears at [pypi.org/project/oinker](https://pypi.org/project/oinker/)
 
 ### Security Features
 
