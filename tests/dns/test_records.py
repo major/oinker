@@ -23,6 +23,7 @@ from oinker import (
     TLSARecord,
     TXTRecord,
     ValidationError,
+    create_record,
 )
 from oinker.dns._records import DNSRecordResponse
 
@@ -345,4 +346,98 @@ class TestDNSRecordRegistry:
         elif record_type == "AAAA":
             kwargs["content"] = "2001:db8::1"
         record = cls(**kwargs)
+        assert record.record_type == record_type
+
+
+class TestCreateRecord:
+    """Tests for the create_record factory function."""
+
+    def test_creates_a_record(self) -> None:
+        record = create_record("A", "1.2.3.4")
+        assert isinstance(record, ARecord)
+        assert record.content == "1.2.3.4"
+        assert record.ttl == 600
+        assert record.name is None
+
+    def test_creates_aaaa_record(self) -> None:
+        record = create_record("AAAA", "2001:db8::1", name="www")
+        assert isinstance(record, AAAARecord)
+        assert record.content == "2001:db8::1"
+        assert record.name == "www"
+
+    def test_creates_mx_record_with_priority(self) -> None:
+        record = create_record("MX", "mail.example.com", priority=10)
+        assert isinstance(record, MXRecord)
+        assert record.content == "mail.example.com"
+        assert record.priority == 10
+
+    def test_creates_txt_record(self) -> None:
+        record = create_record("TXT", "v=spf1 include:_spf.google.com ~all")
+        assert isinstance(record, TXTRecord)
+        assert record.content == "v=spf1 include:_spf.google.com ~all"
+
+    def test_case_insensitive_type(self) -> None:
+        record_lower = create_record("a", "1.2.3.4")
+        record_upper = create_record("A", "1.2.3.4")
+        record_mixed = create_record("Mx", "mail.example.com", priority=10)
+
+        assert isinstance(record_lower, ARecord)
+        assert isinstance(record_upper, ARecord)
+        assert isinstance(record_mixed, MXRecord)
+
+    def test_all_optional_params(self) -> None:
+        record = create_record("A", "1.2.3.4", name="www", ttl=3600, notes="Production server")
+        assert record.name == "www"
+        assert record.ttl == 3600
+        assert record.notes == "Production server"
+
+    def test_priority_ignored_for_non_priority_records(self) -> None:
+        record = create_record("A", "1.2.3.4", priority=10)
+        assert isinstance(record, ARecord)
+        assert not hasattr(record, "priority") or record.__class__.record_type == "A"
+
+    def test_priority_applied_to_srv_record(self) -> None:
+        record = create_record("SRV", "5 5060 sipserver.example.com", priority=20)
+        assert isinstance(record, SRVRecord)
+        assert record.priority == 20
+
+    def test_priority_applied_to_https_record(self) -> None:
+        record = create_record("HTTPS", '. alpn="h2"', priority=1)
+        assert isinstance(record, HTTPSRecord)
+        assert record.priority == 1
+
+    def test_priority_applied_to_svcb_record(self) -> None:
+        record = create_record("SVCB", ". port=443", priority=2)
+        assert isinstance(record, SVCBRecord)
+        assert record.priority == 2
+
+    def test_unknown_record_type_raises_validation_error(self) -> None:
+        with pytest.raises(ValidationError, match="Unknown record type: INVALID"):
+            create_record("INVALID", "content")
+
+    def test_unknown_type_error_lists_valid_types(self) -> None:
+        with pytest.raises(ValidationError, match="Valid types:") as exc_info:
+            create_record("NOPE", "content")
+        assert "A" in str(exc_info.value)
+        assert "MX" in str(exc_info.value)
+
+    def test_invalid_content_raises_validation_error(self) -> None:
+        with pytest.raises(ValidationError, match="Invalid IPv4"):
+            create_record("A", "not-an-ip")
+
+    def test_invalid_ttl_raises_validation_error(self) -> None:
+        with pytest.raises(ValidationError, match="at least 600"):
+            create_record("A", "1.2.3.4", ttl=300)
+
+    @pytest.mark.parametrize("record_type", list(DNS_RECORD_TYPES))
+    def test_all_record_types_creatable(self, record_type: str) -> None:
+        content = (
+            "1.2.3.4"
+            if record_type == "A"
+            else "2001:db8::1"
+            if record_type == "AAAA"
+            else "test.example.com"
+        )
+        priority = 10 if record_type in {"MX", "SRV", "HTTPS", "SVCB"} else None
+        record = create_record(record_type, content, priority=priority)
         assert record.record_type == record_type

@@ -44,6 +44,7 @@ from oinker.dns import (
     SVCBRecord,
     TLSARecord,
     TXTRecord,
+    create_record,
 )
 from oinker.dnssec import DNSSECRecord, DNSSECRecordCreate
 from oinker.domains import (
@@ -82,6 +83,7 @@ __all__ = [
     "DNSRecordResponse",
     "DNS_RECORD_TYPES",
     "DNS_RECORD_CLASSES",
+    "create_record",
     # Domain Types
     "DomainInfo",
     "DomainLabel",
