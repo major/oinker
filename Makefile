@@ -1,4 +1,4 @@
-.PHONY: all lint format typecheck test check clean complexity docstyle
+.PHONY: all lint format typecheck test check clean complexity docstyle docs docs-build
 
 all: check
 
@@ -38,6 +38,12 @@ complexity:
 
 docstyle:
 	uv run ruff check --select=D src/
+
+docs:
+	uv run mkdocs serve
+
+docs-build:
+	uv run mkdocs build
 
 clean:
 	rm -rf .pytest_cache .ruff_cache .coverage htmlcov coverage.xml

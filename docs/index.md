@@ -1,15 +1,16 @@
 # 🐷 Oinker
 
-**A delightfully Pythonic library for managing DNS at Porkbun.** 🐽
+**A delightfully Pythonic library for managing domains at Porkbun.** 🐽
 
-Oinker provides a modern, type-safe Python interface to the [Porkbun API](https://porkbun.com/api/json/v3/documentation). It's async-first for performance, with sync wrappers for simplicity.
+Oinker provides a modern, type-safe Python interface to the [Porkbun API](https://porkbun.com/api/json/v3/documentation). DNS records, DNSSEC, SSL certificates, URL forwarding, and more. Async-first for performance, with sync wrappers for simplicity.
 
 ## ✨ Features
 
+- **Complete API coverage** - DNS, DNSSEC, SSL, domains, URL forwarding, glue records
 - **Async-first design** - Built on httpx for modern async/await support
 - **Type-safe records** - Dataclasses with validation for all DNS record types
 - **Sync wrappers** - Use `Piglet` when you don't need async
-- **CLI included** - Manage DNS from the command line
+- **CLI included** - Manage domains from the command line
 - **Auto-retry** - Exponential backoff for transient failures
 - **Python 3.13+** - Modern Python with full type annotations
 
