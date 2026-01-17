@@ -274,3 +274,60 @@ uv run ty check
 3. **Validation in `__post_init__`**: Records validate themselves on construction
 4. **ClassVar for shared attributes**: `record_type: ClassVar[DNSRecordType] = "A"`
 5. **Frozen dataclasses**: Use `object.__setattr__` when mutation needed in `__post_init__`
+
+## Releasing to PyPI
+
+Oinker uses **Trusted Publishing (OIDC)** - no API tokens needed. PyPI verifies GitHub's identity tokens directly.
+
+### Prerequisites (one-time setup)
+
+1. **PyPI Trusted Publisher**: Configure at https://pypi.org/manage/account/publishing/
+   - Project name: `oinker`
+   - Owner: `major`
+   - Repository: `oinker`
+   - Workflow: `publish.yml`
+   - Environment: `pypi`
+
+2. **GitHub Environment**: Repository Settings → Environments → `pypi`
+   - Enable "Required reviewers" for manual approval gate
+
+### Release Process
+
+```bash
+# 1. Bump version in pyproject.toml
+#    version = "0.1.0" → "0.2.0"
+
+# 2. Commit the version bump
+git commit -am "chore: bump version to 0.2.0"
+
+# 3. Create and push tag
+git tag v0.2.0
+git push && git push --tags
+
+# 4. Create GitHub Release
+#    - Go to https://github.com/major/oinker/releases/new
+#    - Select the tag (v0.2.0)
+#    - Generate release notes (or write your own)
+#    - Click "Publish release"
+
+# 5. Approve the deployment
+#    - GitHub Actions will pause at the `pypi` environment
+#    - Review and approve to publish to PyPI
+```
+
+### What Happens Automatically
+
+1. GitHub Release triggers `.github/workflows/publish.yml`
+2. CI runs first (lint, typecheck, test)
+3. If CI passes, `uv build` creates wheel + sdist
+4. `pypa/gh-action-pypi-publish` uploads via OIDC (no tokens!)
+5. Package appears at https://pypi.org/project/oinker/
+
+### Security Features
+
+| Feature | How It Works |
+|---------|--------------|
+| No long-lived tokens | OIDC tokens expire in 15 minutes |
+| Manual approval gate | GitHub Environment protection |
+| Cryptographic attestations | Automatic with gh-action-pypi-publish |
+| Audit trail | GitHub Releases show who/when |
