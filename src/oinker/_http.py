@@ -27,6 +27,18 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+_HTTP_STATUS_TO_EXCEPTION = {
+    401: AuthenticationError,
+    403: AuthorizationError,
+    404: NotFoundError,
+}
+
+_ERROR_MESSAGE_PATTERNS = [
+    (["invalid api key", "authentication"], AuthenticationError),
+    (["not authorized", "permission"], AuthorizationError),
+    (["not found", "does not exist"], NotFoundError),
+]
+
 
 class HttpClient:
     """Async HTTP client with retry logic for the Porkbun API.
@@ -149,23 +161,22 @@ class HttpClient:
         Raises:
             Various OinkerError subclasses based on response.
         """
-        # Porkbun uses HTTP 200 for most responses, status is in JSON
         try:
             data = response.json()
         except ValueError as e:
             msg = f"Invalid JSON response: {response.text[:200]}"
             raise APIError(msg, status_code=response.status_code) from e
 
-        status = data.get("status", "")
         message = data.get("message", "Unknown error")
 
-        # Check for HTTP-level errors first
-        if response.status_code == 401:
-            raise AuthenticationError(message)
-        if response.status_code == 403:
-            raise AuthorizationError(message)
-        if response.status_code == 404:
-            raise NotFoundError(message)
+        self._raise_for_http_status(response, message)
+
+        if data.get("status", "").upper() == "ERROR":
+            self._raise_for_api_error(message, response.status_code)
+
+        return data
+
+    def _raise_for_http_status(self, response: httpx.Response, message: str) -> None:
         if response.status_code == 429:
             retry_after = response.headers.get("Retry-After")
             raise RateLimitError(
@@ -173,16 +184,13 @@ class HttpClient:
                 retry_after=float(retry_after) if retry_after else None,
             )
 
-        # Check API-level status
-        if status.upper() == "ERROR":
-            # Porkbun returns error info in the message field
-            msg_lower = message.lower()
-            if "invalid api key" in msg_lower or "authentication" in msg_lower:
-                raise AuthenticationError(message)
-            if "not authorized" in msg_lower or "permission" in msg_lower:
-                raise AuthorizationError(message)
-            if "not found" in msg_lower or "does not exist" in msg_lower:
-                raise NotFoundError(message)
-            raise APIError(message, status_code=response.status_code)
+        exc_class = _HTTP_STATUS_TO_EXCEPTION.get(response.status_code)
+        if exc_class:
+            raise exc_class(message)
 
-        return data
+    def _raise_for_api_error(self, message: str, status_code: int) -> None:
+        msg_lower = message.lower()
+        for patterns, exc_class in _ERROR_MESSAGE_PATTERNS:
+            if any(pattern in msg_lower for pattern in patterns):
+                raise exc_class(message)
+        raise APIError(message, status_code=status_code)
