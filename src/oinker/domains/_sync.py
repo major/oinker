@@ -6,8 +6,9 @@ Provides sync wrappers around the async Domains API.
 from __future__ import annotations
 
 import builtins
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
+from oinker._sync_base import SyncAPIBase
 from oinker.domains._types import (
     DomainAvailability,
     DomainInfo,
@@ -17,25 +18,14 @@ from oinker.domains._types import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
-    from oinker.domains._api import AsyncDomainsAPI
+    from oinker.domains._api import AsyncDomainsAPI  # noqa: F401
 
 
-class SyncDomainsAPI:
+class SyncDomainsAPI(SyncAPIBase["AsyncDomainsAPI"]):
     """Synchronous domain operations for the Porkbun API.
 
     Accessed via `piglet.domains.*` methods.
     """
-
-    def __init__(
-        self,
-        async_api: AsyncDomainsAPI,
-        runner: Callable[..., Any],
-    ) -> None:
-        """Initialize sync Domains API."""
-        self._async_api = async_api
-        self._run = runner
 
     def list(
         self,

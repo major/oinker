@@ -6,13 +6,12 @@ from typing import Annotated
 
 import typer
 
-from oinker import OinkerError
 from oinker.cli._dns import dns_app
 from oinker.cli._dnssec import dnssec_app
 from oinker.cli._domains import domains_app
 from oinker.cli._pricing import pricing_app
 from oinker.cli._ssl import ssl_app
-from oinker.cli._utils import console, err_console, get_client
+from oinker.cli._utils import console, get_client, handle_errors
 
 app = typer.Typer(
     name="oinker",
@@ -43,14 +42,11 @@ def ping(
 
     Verifies your credentials work and shows your public IP address.
     """
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             response = client.ping()
         console.print("\U0001f437 Oink! Connected successfully.")
         console.print(f"   Your IP: {response.your_ip}")
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 if __name__ == "__main__":

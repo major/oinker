@@ -7,8 +7,7 @@ from typing import Annotated
 
 import typer
 
-from oinker import OinkerError
-from oinker.cli._utils import console, err_console, get_client
+from oinker.cli._utils import console, get_client, handle_errors
 
 ssl_app = typer.Typer(
     name="ssl",
@@ -46,7 +45,7 @@ def retrieve_ssl(
         oinker ssl retrieve example.com
         oinker ssl retrieve example.com --output /etc/ssl/certs/
     """
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             bundle = client.ssl.retrieve(domain)
 
@@ -73,6 +72,3 @@ def retrieve_ssl(
             console.print("\n[bold]Public Key:[/bold]")
             console.print(bundle.public_key)
             console.print("\n[dim]Use --output to save files including private key[/dim]")
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None

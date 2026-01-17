@@ -7,8 +7,7 @@ from typing import Annotated
 import typer
 from rich.table import Table
 
-from oinker._exceptions import OinkerError
-from oinker.cli._utils import console, err_console
+from oinker.cli._utils import console, err_console, handle_errors
 from oinker.pricing import get_pricing_sync
 
 pricing_app = typer.Typer(
@@ -46,7 +45,7 @@ def list_pricing(
         oinker pricing list --tld com
         oinker pricing list --sort registration --limit 20
     """
-    try:
+    with handle_errors():
         pricing = get_pricing_sync()
 
         if tld:
@@ -88,9 +87,6 @@ def list_pricing(
 
         console.print(table)
         console.print(f"\n\U0001f437 Showing {len(items)} TLDs")
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @pricing_app.callback(invoke_without_command=True)
