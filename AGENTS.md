@@ -16,6 +16,7 @@ make lint          # ruff check .
 make format        # ruff format .
 make typecheck     # ty check
 make test          # pytest with coverage
+make docstyle      # ruff D rules (Google-style docstrings)
 
 # Run single test file
 uv run pytest tests/test_client.py
@@ -148,6 +149,15 @@ except AddressValueError as e:
 ```
 
 ### Docstrings (PEP 257 Google style)
+
+**All public functions, classes, and modules require docstrings.** Enforced via `make docstyle`.
+
+| Element | Requirement |
+|---------|-------------|
+| Modules | One-line summary of purpose |
+| Classes | Summary + Attributes section if public attrs |
+| Public functions/methods | Summary + Args/Returns/Raises as applicable |
+| Private functions (`_foo`) | Optional, but encouraged for complex logic |
 
 ```python
 async def create(self, domain: str, record: DNSRecord) -> str:

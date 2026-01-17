@@ -59,7 +59,19 @@ target-version = "py313"
 line-length = 100
 
 [tool.ruff.lint]
-select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC"]
+select = ["E", "F", "I", "UP", "B", "SIM", "ASYNC", "D"]
+ignore = [
+    "D100",  # Missing docstring in public module (too noisy for __init__.py)
+    "D104",  # Missing docstring in public package
+    "D105",  # Missing docstring in magic method
+    "D107",  # Missing docstring in __init__
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["D"]  # Don't require docstrings in tests
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
