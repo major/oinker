@@ -250,6 +250,160 @@ def get_record(
         console.print(table)
 
 
+def _resolve_subdomain(
+    name: str | None, domain: str, existing_name: str | None = None
+) -> str | None:
+    """Resolve subdomain from CLI input.
+
+    Args:
+        name: CLI --name argument (@ means root, None means use existing).
+        domain: The base domain.
+        existing_name: Existing record's full name for fallback extraction.
+
+    Returns:
+        Subdomain string or None for root.
+    """
+    if name == "@":
+        return None
+    if name is not None:
+        return name
+    if existing_name is None:
+        return None
+
+    # Extract subdomain from existing record's full name
+    subdomain = existing_name.removesuffix(f".{domain}") or None
+    return None if subdomain == domain else subdomain
+
+
+def _build_updated_record(
+    record_type: str,
+    content: str,
+    subdomain: str | None,
+    ttl: int,
+    priority: int | None,
+    notes: str | None,
+) -> ARecord | AAAARecord | CNAMERecord | MXRecord | TXTRecord:
+    """Build a DNS record instance for editing.
+
+    Args:
+        record_type: Record type (A, AAAA, CNAME, MX, TXT).
+        content: Record content value.
+        subdomain: Subdomain name or None for root.
+        ttl: TTL in seconds.
+        priority: Priority for MX records.
+        notes: Optional notes to attach.
+
+    Returns:
+        Constructed DNS record instance.
+    """
+    record_cls = RECORD_TYPES[record_type]
+
+    if record_type == "MX":
+        record = record_cls(content=content, name=subdomain, ttl=ttl, priority=priority or 10)
+    else:
+        record = record_cls(content=content, name=subdomain, ttl=ttl)
+
+    if notes is not None:
+        object.__setattr__(record, "notes", notes)
+
+    return record
+
+
+def _edit_record_by_id(
+    domain: str,
+    record_id: str,
+    content: str,
+    name: str | None,
+    ttl: int | None,
+    priority: int | None,
+    notes: str | None,
+    api_key: str | None,
+    secret_key: str | None,
+) -> None:
+    """Edit a DNS record by its ID.
+
+    Args:
+        domain: Domain the record belongs to.
+        record_id: ID of the record to edit.
+        content: New content value.
+        name: New subdomain name (@ for root, None to keep existing).
+        ttl: New TTL or None to keep existing.
+        priority: New priority or None to keep existing.
+        notes: New notes or None to keep existing.
+        api_key: Porkbun API key.
+        secret_key: Porkbun secret key.
+    """
+    with get_client(api_key, secret_key) as client:
+        existing = client.dns.get(domain, record_id)
+        if not existing:
+            err_console.print(
+                f"\U0001f437 Oops! Record {record_id} not found",
+                style="bold red",
+            )
+            raise typer.Exit(code=1)
+
+        record_type_upper = existing.record_type.upper()
+        if record_type_upper not in RECORD_TYPES:
+            err_console.print(
+                f"\U0001f437 Oops! Editing {record_type_upper} not supported via CLI",
+                style="bold red",
+            )
+            raise typer.Exit(code=1)
+
+        subdomain = _resolve_subdomain(name, domain, existing.name)
+        new_ttl = ttl if ttl is not None else existing.ttl
+        new_priority = priority if priority is not None else existing.priority
+
+        new_record = _build_updated_record(
+            record_type_upper, content, subdomain, new_ttl, new_priority, notes
+        )
+        client.dns.edit(domain, record_id, new_record)
+
+    console.print(f"\U0001f437 Updated record {record_id}")
+
+
+def _edit_record_by_type_name(
+    domain: str,
+    record_type: str,
+    name: str | None,
+    content: str,
+    ttl: int | None,
+    priority: int | None,
+    notes: str | None,
+    api_key: str | None,
+    secret_key: str | None,
+) -> None:
+    """Edit DNS records by type and name.
+
+    Args:
+        domain: Domain the records belong to.
+        record_type: Record type to match.
+        name: Subdomain name to match (@ for root).
+        content: New content value.
+        ttl: New TTL or None to keep existing.
+        priority: New priority or None to keep existing.
+        notes: New notes or None to keep existing.
+        api_key: Porkbun API key.
+        secret_key: Porkbun secret key.
+    """
+    subdomain = None if name == "@" else name
+    with get_client(api_key, secret_key) as client:
+        client.dns.edit_by_name_type(
+            domain,
+            record_type.upper(),
+            subdomain,
+            content=content,
+            ttl=ttl,
+            priority=priority,
+            notes=notes,
+        )
+
+    name_display = name or "root"
+    console.print(
+        f"\U0001f437 Updated all {record_type.upper()} records for {name_display}.{domain}"
+    )
+
+
 @dns_app.command("edit")
 def edit_record(
     domain: Annotated[str, typer.Argument(help="Domain to edit record for")],
@@ -295,76 +449,20 @@ def edit_record(
         )
         raise typer.Exit(code=1)
 
-    if record_id:
-        if not content:
-            err_console.print(
-                "\U0001f437 Oops! --content is required when editing by ID",
-                style="bold red",
+    if not content:
+        err_console.print(
+            "\U0001f437 Oops! --content is required",
+            style="bold red",
+        )
+        raise typer.Exit(code=1)
+
+    with handle_errors():
+        if record_id:
+            _edit_record_by_id(
+                domain, record_id, content, name, ttl, priority, notes, api_key, secret_key
             )
-            raise typer.Exit(code=1)
-
-        with handle_errors():
-            with get_client(api_key, secret_key) as client:
-                existing = client.dns.get(domain, record_id)
-                if not existing:
-                    err_console.print(
-                        f"\U0001f437 Oops! Record {record_id} not found",
-                        style="bold red",
-                    )
-                    raise typer.Exit(code=1)
-
-                record_type_upper = existing.record_type.upper()
-                if record_type_upper not in RECORD_TYPES:
-                    err_console.print(
-                        f"\U0001f437 Oops! Editing {record_type_upper} not supported via CLI",
-                        style="bold red",
-                    )
-                    raise typer.Exit(code=1)
-
-                record_cls = RECORD_TYPES[record_type_upper]
-                existing_subdomain = existing.name.removesuffix(f".{domain}") or None
-                if existing_subdomain == domain:
-                    existing_subdomain = None
-                subdomain = None if name == "@" else (name if name else existing_subdomain)
-
-                new_ttl = ttl if ttl is not None else existing.ttl
-                if record_type_upper == "MX":
-                    new_priority = priority if priority is not None else existing.priority or 10
-                    new_record = record_cls(
-                        content=content, name=subdomain, ttl=new_ttl, priority=new_priority
-                    )
-                else:
-                    new_record = record_cls(content=content, name=subdomain, ttl=new_ttl)
-
-                if notes is not None:
-                    object.__setattr__(new_record, "notes", notes)
-
-                client.dns.edit(domain, record_id, new_record)
-
-            console.print(f"\U0001f437 Updated record {record_id}")
-    else:
-        if not content:
-            err_console.print(
-                "\U0001f437 Oops! --content is required when editing by type/name",
-                style="bold red",
-            )
-            raise typer.Exit(code=1)
-
-        with handle_errors():
-            subdomain = None if name == "@" else name
+        else:
             assert record_type is not None
-            with get_client(api_key, secret_key) as client:
-                client.dns.edit_by_name_type(
-                    domain,
-                    record_type.upper(),
-                    subdomain,
-                    content=content,
-                    ttl=ttl,
-                    priority=priority,
-                    notes=notes,
-                )
-
-            name_display = name or "root"
-            console.print(
-                f"\U0001f437 Updated all {record_type.upper()} records for {name_display}.{domain}"
+            _edit_record_by_type_name(
+                domain, record_type, name, content, ttl, priority, notes, api_key, secret_key
             )
