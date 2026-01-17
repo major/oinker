@@ -7,8 +7,7 @@ from typing import Annotated
 import typer
 from rich.table import Table
 
-from oinker import OinkerError
-from oinker.cli._utils import console, err_console, get_client
+from oinker.cli._utils import console, get_client, handle_errors
 from oinker.dnssec import DNSSECRecordCreate
 
 dnssec_app = typer.Typer(
@@ -34,7 +33,7 @@ def list_dnssec_records(
 
     Shows DS records registered at the domain registry.
     """
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             records = client.dnssec.list(domain)
 
@@ -60,9 +59,6 @@ def list_dnssec_records(
             )
 
         console.print(table)
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @dnssec_app.command("create")
@@ -104,7 +100,7 @@ def create_dnssec_record(
     Examples:
         oinker dnssec create example.com 64087 13 2 15E445BD08128BDC...
     """
-    try:
+    with handle_errors():
         record = DNSSECRecordCreate(
             key_tag=key_tag,
             algorithm=algorithm,
@@ -120,9 +116,6 @@ def create_dnssec_record(
             client.dnssec.create(domain, record)
 
         console.print(f"\U0001f437 Created DNSSEC record with key tag {key_tag}")
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @dnssec_app.command("delete")
@@ -146,11 +139,8 @@ def delete_dnssec_record(
     Examples:
         oinker dnssec delete example.com 64087
     """
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             client.dnssec.delete(domain, key_tag)
 
         console.print(f"\U0001f437 Deleted DNSSEC record with key tag {key_tag}")
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None

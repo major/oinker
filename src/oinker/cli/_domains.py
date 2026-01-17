@@ -7,8 +7,7 @@ from typing import Annotated
 import typer
 from rich.table import Table
 
-from oinker import OinkerError
-from oinker.cli._utils import console, err_console, get_client
+from oinker.cli._utils import console, err_console, get_client, handle_errors
 from oinker.domains import URLForwardCreate
 
 domains_app = typer.Typer(
@@ -33,7 +32,7 @@ def list_domains(
 
     Shows a table of all domains including status, expiration, and settings.
     """
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             domains = client.domains.list()
 
@@ -61,9 +60,6 @@ def list_domains(
             )
 
         console.print(table)
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @domains_app.command("nameservers")
@@ -82,7 +78,7 @@ def get_nameservers(
 
     Shows the nameservers currently configured for the domain.
     """
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             nameservers = client.domains.get_nameservers(domain)
 
@@ -93,9 +89,6 @@ def get_nameservers(
         console.print(f"\U0001f437 Nameservers for [cyan]{domain}[/cyan]:")
         for ns in nameservers:
             console.print(f"   {ns}")
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @domains_app.command("update-nameservers")
@@ -119,16 +112,13 @@ def update_nameservers(
     Examples:
         oinker domains update-nameservers example.com ns1.example.com ns2.example.com
     """
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             client.domains.update_nameservers(domain, nameservers)
 
         console.print(f"\U0001f437 Updated nameservers for [cyan]{domain}[/cyan]:")
         for ns in nameservers:
             console.print(f"   {ns}")
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @domains_app.command("check")
@@ -150,7 +140,7 @@ def check_availability(
     Examples:
         oinker domains check example.com
     """
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             result = client.domains.check(domain)
 
@@ -178,9 +168,6 @@ def check_availability(
             console.print("   [yellow]First year promo pricing available![/yellow]")
         if result.premium:
             console.print("   [magenta]This is a premium domain[/magenta]")
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @domains_app.command("forwards-list")
@@ -196,7 +183,7 @@ def list_url_forwards(
     ] = None,
 ) -> None:
     """List URL forwarding rules for a domain."""
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             forwards = client.domains.get_url_forwards(domain)
 
@@ -226,9 +213,6 @@ def list_url_forwards(
             )
 
         console.print(table)
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @domains_app.command("forwards-add")
@@ -270,7 +254,7 @@ def add_url_forward(
         )
         raise typer.Exit(code=1)
 
-    try:
+    with handle_errors():
         forward = URLForwardCreate(
             location=location,
             type=forward_type,  # type: ignore[arg-type]
@@ -285,9 +269,6 @@ def add_url_forward(
         console.print(
             f"\U0001f437 Added URL forward: [cyan]{subdomain_display}.{domain}[/cyan] -> {location}"
         )
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @domains_app.command("forwards-delete")
@@ -308,14 +289,11 @@ def delete_url_forward(
     Examples:
         oinker domains forwards-delete example.com 12345678
     """
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             client.domains.delete_url_forward(domain, forward_id)
 
         console.print(f"\U0001f437 Deleted URL forward {forward_id}")
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @domains_app.command("glue-list")
@@ -331,7 +309,7 @@ def list_glue_records(
     ] = None,
 ) -> None:
     """List glue records for a domain."""
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             records = client.domains.get_glue_records(domain)
 
@@ -350,9 +328,6 @@ def list_glue_records(
             table.add_row(record.hostname, ipv4, ipv6)
 
         console.print(table)
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @domains_app.command("glue-create")
@@ -375,14 +350,11 @@ def create_glue_record(
         oinker domains glue-create example.com ns1 192.168.1.1
         oinker domains glue-create example.com ns1 192.168.1.1 2001:db8::1
     """
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             client.domains.create_glue_record(domain, subdomain, ips)
 
         console.print(f"\U0001f437 Created glue record [cyan]{subdomain}.{domain}[/cyan]")
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @domains_app.command("glue-update")
@@ -404,14 +376,11 @@ def update_glue_record(
     Examples:
         oinker domains glue-update example.com ns1 192.168.1.2
     """
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             client.domains.update_glue_record(domain, subdomain, ips)
 
         console.print(f"\U0001f437 Updated glue record [cyan]{subdomain}.{domain}[/cyan]")
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @domains_app.command("glue-delete")
@@ -432,11 +401,8 @@ def delete_glue_record(
     Examples:
         oinker domains glue-delete example.com ns1
     """
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             client.domains.delete_glue_record(domain, subdomain)
 
         console.print(f"\U0001f437 Deleted glue record [cyan]{subdomain}.{domain}[/cyan]")
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None

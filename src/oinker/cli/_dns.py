@@ -7,8 +7,7 @@ from typing import Annotated
 import typer
 from rich.table import Table
 
-from oinker import OinkerError
-from oinker.cli._utils import console, err_console, get_client
+from oinker.cli._utils import console, err_console, get_client, handle_errors
 from oinker.dns import AAAARecord, ARecord, CNAMERecord, MXRecord, TXTRecord
 
 dns_app = typer.Typer(
@@ -34,7 +33,7 @@ def list_records(
 
     Shows a table of all records including ID, name, type, content, and TTL.
     """
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             records = client.dns.list(domain)
 
@@ -63,9 +62,6 @@ def list_records(
             )
 
         console.print(table)
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 # Record type factory for creating records from CLI args
@@ -119,7 +115,7 @@ def create_record(
     # Handle @ for root domain
     subdomain = None if name == "@" else name
 
-    try:
+    with handle_errors():
         record_cls = RECORD_TYPES[record_type_upper]
         # MX records need priority
         if record_type_upper == "MX":
@@ -131,9 +127,6 @@ def create_record(
             record_id = client.dns.create(domain, record)
 
         console.print(f"\U0001f437 Squeee! Created record {record_id}")
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @dns_app.command("delete")
@@ -170,23 +163,19 @@ def delete_record(
         )
         raise typer.Exit(code=1)
 
-    try:
-        with get_client(api_key, secret_key) as client:
-            if record_id:
-                client.dns.delete(domain, record_id=record_id)
-                console.print(f"\U0001f437 Gobbled up record {record_id}")
-            else:
-                # Delete by type/name - handle @ for root
-                subdomain = "" if name == "@" else (name or "")
-                assert record_type is not None  # Validated at line 166
-                client.dns.delete_by_name_type(domain, record_type, subdomain)
-                console.print(
-                    f"\U0001f437 Gobbled up all {record_type} records for "
-                    f"{subdomain or 'root'}.{domain}"
-                )
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
+    with handle_errors(), get_client(api_key, secret_key) as client:
+        if record_id:
+            client.dns.delete(domain, record_id=record_id)
+            console.print(f"\U0001f437 Gobbled up record {record_id}")
+        else:
+            # Delete by type/name - handle @ for root
+            subdomain = "" if name == "@" else (name or "")
+            assert record_type is not None  # Validated at line 166
+            client.dns.delete_by_name_type(domain, record_type, subdomain)
+            console.print(
+                f"\U0001f437 Gobbled up all {record_type} records for "
+                f"{subdomain or 'root'}.{domain}"
+            )
 
 
 @dns_app.command("get")
@@ -223,7 +212,7 @@ def get_record(
         )
         raise typer.Exit(code=1)
 
-    try:
+    with handle_errors():
         with get_client(api_key, secret_key) as client:
             if record_id:
                 record = client.dns.get(domain, record_id)
@@ -259,9 +248,6 @@ def get_record(
             )
 
         console.print(table)
-    except OinkerError as e:
-        err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-        raise typer.Exit(code=1) from None
 
 
 @dns_app.command("edit")
@@ -317,7 +303,7 @@ def edit_record(
             )
             raise typer.Exit(code=1)
 
-        try:
+        with handle_errors():
             with get_client(api_key, secret_key) as client:
                 existing = client.dns.get(domain, record_id)
                 if not existing:
@@ -356,9 +342,6 @@ def edit_record(
                 client.dns.edit(domain, record_id, new_record)
 
             console.print(f"\U0001f437 Updated record {record_id}")
-        except OinkerError as e:
-            err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-            raise typer.Exit(code=1) from None
     else:
         if not content:
             err_console.print(
@@ -367,7 +350,7 @@ def edit_record(
             )
             raise typer.Exit(code=1)
 
-        try:
+        with handle_errors():
             subdomain = None if name == "@" else name
             assert record_type is not None
             with get_client(api_key, secret_key) as client:
@@ -385,6 +368,3 @@ def edit_record(
             console.print(
                 f"\U0001f437 Updated all {record_type.upper()} records for {name_display}.{domain}"
             )
-        except OinkerError as e:
-            err_console.print(f"\U0001f437 Oops! {e}", style="bold red")
-            raise typer.Exit(code=1) from None
