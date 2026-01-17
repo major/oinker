@@ -27,6 +27,8 @@ from oinker._exceptions import (
 from oinker._sync import Piglet
 from oinker._types import PingResponse
 from oinker.dns import (
+    DNS_RECORD_CLASSES,
+    DNS_RECORD_TYPES,
     AAAARecord,
     ALIASRecord,
     ARecord,
@@ -78,6 +80,8 @@ __all__ = [
     "SSHFPRecord",
     "DNSRecord",
     "DNSRecordResponse",
+    "DNS_RECORD_TYPES",
+    "DNS_RECORD_CLASSES",
     # Domain Types
     "DomainInfo",
     "DomainLabel",
