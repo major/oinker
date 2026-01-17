@@ -84,6 +84,29 @@ def _validate_priority(priority: int) -> None:
         raise ValidationError(msg)
 
 
+def _validate_content_not_empty(
+    content: str, record_type: str, description: str | None = None
+) -> None:
+    """Validate that content is not empty.
+
+    Args:
+        content: The record content.
+        record_type: The record type name for error message.
+        description: Optional human-readable description of the content
+            (e.g., "mail server", "target", "nameserver") to include in
+            the error message.
+
+    Raises:
+        ValidationError: If content is empty.
+    """
+    if not content:
+        if description:
+            msg = f"{record_type} record content ({description}) cannot be empty"
+        else:
+            msg = f"{record_type} record content cannot be empty"
+        raise ValidationError(msg)
+
+
 def _safe_int(value: str, default: int) -> int:
     """Safely parse a string to int with fallback.
 
@@ -177,9 +200,7 @@ class MXRecord:
         """Validate the record."""
         _validate_ttl(self.ttl)
         _validate_priority(self.priority)
-        if not self.content:
-            msg = "MX record content (mail server) cannot be empty"
-            raise ValidationError(msg)
+        _validate_content_not_empty(self.content, "MX", "mail server")
 
 
 @dataclass(slots=True)
@@ -226,9 +247,7 @@ class CNAMERecord:
     def __post_init__(self) -> None:
         """Validate the record."""
         _validate_ttl(self.ttl)
-        if not self.content:
-            msg = "CNAME record content (target) cannot be empty"
-            raise ValidationError(msg)
+        _validate_content_not_empty(self.content, "CNAME", "target")
 
 
 @dataclass(slots=True)
@@ -252,9 +271,7 @@ class ALIASRecord:
     def __post_init__(self) -> None:
         """Validate the record."""
         _validate_ttl(self.ttl)
-        if not self.content:
-            msg = "ALIAS record content (target) cannot be empty"
-            raise ValidationError(msg)
+        _validate_content_not_empty(self.content, "ALIAS", "target")
 
 
 @dataclass(slots=True)
@@ -278,9 +295,7 @@ class NSRecord:
     def __post_init__(self) -> None:
         """Validate the record."""
         _validate_ttl(self.ttl)
-        if not self.content:
-            msg = "NS record content (nameserver) cannot be empty"
-            raise ValidationError(msg)
+        _validate_content_not_empty(self.content, "NS", "nameserver")
 
 
 @dataclass(slots=True)
@@ -309,9 +324,7 @@ class SRVRecord:
         """Validate the record."""
         _validate_ttl(self.ttl)
         _validate_priority(self.priority)
-        if not self.content:
-            msg = "SRV record content cannot be empty"
-            raise ValidationError(msg)
+        _validate_content_not_empty(self.content, "SRV")
 
 
 @dataclass(slots=True)
@@ -337,9 +350,7 @@ class TLSARecord:
     def __post_init__(self) -> None:
         """Validate the record."""
         _validate_ttl(self.ttl)
-        if not self.content:
-            msg = "TLSA record content cannot be empty"
-            raise ValidationError(msg)
+        _validate_content_not_empty(self.content, "TLSA")
 
 
 @dataclass(slots=True)
@@ -365,9 +376,7 @@ class CAARecord:
     def __post_init__(self) -> None:
         """Validate the record."""
         _validate_ttl(self.ttl)
-        if not self.content:
-            msg = "CAA record content cannot be empty"
-            raise ValidationError(msg)
+        _validate_content_not_empty(self.content, "CAA")
 
 
 @dataclass(slots=True)
@@ -394,9 +403,7 @@ class HTTPSRecord:
         """Validate the record."""
         _validate_ttl(self.ttl)
         _validate_priority(self.priority)
-        if not self.content:
-            msg = "HTTPS record content cannot be empty"
-            raise ValidationError(msg)
+        _validate_content_not_empty(self.content, "HTTPS")
 
 
 @dataclass(slots=True)
@@ -423,9 +430,7 @@ class SVCBRecord:
         """Validate the record."""
         _validate_ttl(self.ttl)
         _validate_priority(self.priority)
-        if not self.content:
-            msg = "SVCB record content cannot be empty"
-            raise ValidationError(msg)
+        _validate_content_not_empty(self.content, "SVCB")
 
 
 @dataclass(slots=True)
@@ -451,9 +456,7 @@ class SSHFPRecord:
     def __post_init__(self) -> None:
         """Validate the record."""
         _validate_ttl(self.ttl)
-        if not self.content:
-            msg = "SSHFP record content cannot be empty"
-            raise ValidationError(msg)
+        _validate_content_not_empty(self.content, "SSHFP")
 
 
 # Type alias for any DNS record
