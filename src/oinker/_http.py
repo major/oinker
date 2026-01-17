@@ -108,7 +108,9 @@ class HttpClient:
 
         for attempt in range(self._config.max_retries + 1):
             try:
+                logger.debug("POST %s", endpoint)
                 response = await self._client.post(endpoint, json=body)
+                logger.debug("Response %s: %s", response.status_code, response.text[:200])
                 return self._handle_response(response)
 
             except (httpx.ConnectError, httpx.TimeoutException) as e:

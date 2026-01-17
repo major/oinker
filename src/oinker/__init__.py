@@ -12,6 +12,8 @@ with Piglet() as piglet:
     pong = piglet.ping()
 """
 
+import logging
+
 from oinker._client import AsyncPiglet
 from oinker._exceptions import (
     APIError,
@@ -104,3 +106,8 @@ __all__ = [
 ]
 
 __version__ = "0.1.0"
+
+# Library logging best practice: add NullHandler to prevent
+# "No handler found" warnings when the library is used without
+# logging configured by the application.
+logging.getLogger(__name__).addHandler(logging.NullHandler())
