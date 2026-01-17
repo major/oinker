@@ -1,4 +1,4 @@
-.PHONY: all lint format typecheck test check clean complexity
+.PHONY: all lint format typecheck test check clean complexity docstyle
 
 all: check
 
@@ -35,6 +35,9 @@ complexity:
 	else \
 		echo "Complexity check passed (no D+ functions)"; \
 	fi
+
+docstyle:
+	uv run ruff check --select=D src/
 
 clean:
 	rm -rf .pytest_cache .ruff_cache .coverage htmlcov coverage.xml
