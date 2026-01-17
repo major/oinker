@@ -6,30 +6,20 @@ Provides sync wrappers around the async DNSSEC API.
 from __future__ import annotations
 
 import builtins
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
+from oinker._sync_base import SyncAPIBase
 from oinker.dnssec._types import DNSSECRecord, DNSSECRecordCreate
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
-    from oinker.dnssec._api import AsyncDNSSECAPI
+    from oinker.dnssec._api import AsyncDNSSECAPI  # noqa: F401
 
 
-class SyncDNSSECAPI:
+class SyncDNSSECAPI(SyncAPIBase["AsyncDNSSECAPI"]):
     """Synchronous DNSSEC operations for the Porkbun API.
 
     Accessed via `piglet.dnssec.*` methods.
     """
-
-    def __init__(
-        self,
-        async_api: AsyncDNSSECAPI,
-        runner: Callable[..., Any],
-    ) -> None:
-        """Initialize sync DNSSEC API."""
-        self._async_api = async_api
-        self._run = runner
 
     def list(self, domain: str) -> builtins.list[DNSSECRecord]:
         """See :meth:`AsyncDNSSECAPI.list`."""

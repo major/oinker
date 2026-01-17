@@ -6,30 +6,20 @@ Provides sync wrappers around the async DNS API.
 from __future__ import annotations
 
 import builtins
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
+from oinker._sync_base import SyncAPIBase
 from oinker.dns._records import DNSRecord, DNSRecordResponse
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
-    from oinker.dns._api import AsyncDNSAPI
+    from oinker.dns._api import AsyncDNSAPI  # noqa: F401
 
 
-class SyncDNSAPI:
+class SyncDNSAPI(SyncAPIBase["AsyncDNSAPI"]):
     """Synchronous DNS operations for the Porkbun API.
 
     Accessed via `piglet.dns.*` methods.
     """
-
-    def __init__(
-        self,
-        async_api: AsyncDNSAPI,
-        runner: Callable[..., Any],
-    ) -> None:
-        """Initialize sync DNS API."""
-        self._async_api = async_api
-        self._run = runner
 
     def list(self, domain: str) -> builtins.list[DNSRecordResponse]:
         """See :meth:`AsyncDNSAPI.list`."""
