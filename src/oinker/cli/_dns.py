@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 import typer
 from rich.table import Table
 
 from oinker.cli._utils import console, err_console, get_client, handle_errors
 from oinker.dns import AAAARecord, ARecord, CNAMERecord, MXRecord, TXTRecord
+
+if TYPE_CHECKING:
+    from oinker import Piglet
+    from oinker.dns import DNSRecordResponse
 
 dns_app = typer.Typer(
     name="dns",
@@ -178,6 +182,47 @@ def delete_record(
             )
 
 
+def _fetch_records(
+    client: Piglet,
+    domain: str,
+    record_id: str | None,
+    record_type: str | None,
+    name: str | None,
+) -> list[DNSRecordResponse]:
+    if record_id:
+        record = client.dns.get(domain, record_id)
+        return [record] if record else []
+
+    subdomain = None if name == "@" else name
+    assert record_type is not None
+    return client.dns.get_by_name_type(domain, record_type.upper(), subdomain)
+
+
+def _display_records(records: list[DNSRecordResponse]) -> None:
+    table = Table(title="\U0001f437 DNS Record(s)")
+    table.add_column("ID", style="dim")
+    table.add_column("Name", style="cyan")
+    table.add_column("Type", style="green")
+    table.add_column("Content", style="white")
+    table.add_column("TTL", style="yellow", justify="right")
+    table.add_column("Priority", style="magenta", justify="right")
+    table.add_column("Notes", style="dim")
+
+    for record in records:
+        priority_str = str(record.priority) if record.priority else ""
+        table.add_row(
+            record.id,
+            record.name,
+            record.record_type,
+            record.content,
+            str(record.ttl),
+            priority_str,
+            record.notes or "",
+        )
+
+    console.print(table)
+
+
 @dns_app.command("get")
 def get_record(
     domain: Annotated[str, typer.Argument(help="Domain to get record from")],
@@ -214,40 +259,13 @@ def get_record(
 
     with handle_errors():
         with get_client(api_key, secret_key) as client:
-            if record_id:
-                record = client.dns.get(domain, record_id)
-                records = [record] if record else []
-            else:
-                subdomain = None if name == "@" else name
-                assert record_type is not None
-                records = client.dns.get_by_name_type(domain, record_type.upper(), subdomain)
+            records = _fetch_records(client, domain, record_id, record_type, name)
 
         if not records:
             console.print("\U0001f437 No matching records found")
             return
 
-        table = Table(title="\U0001f437 DNS Record(s)")
-        table.add_column("ID", style="dim")
-        table.add_column("Name", style="cyan")
-        table.add_column("Type", style="green")
-        table.add_column("Content", style="white")
-        table.add_column("TTL", style="yellow", justify="right")
-        table.add_column("Priority", style="magenta", justify="right")
-        table.add_column("Notes", style="dim")
-
-        for record in records:
-            priority_str = str(record.priority) if record.priority else ""
-            table.add_row(
-                record.id,
-                record.name,
-                record.record_type,
-                record.content,
-                str(record.ttl),
-                priority_str,
-                record.notes or "",
-            )
-
-        console.print(table)
+        _display_records(records)
 
 
 def _resolve_subdomain(

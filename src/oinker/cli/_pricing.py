@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from typing import Annotated
 
 import typer
@@ -9,6 +10,19 @@ from rich.table import Table
 
 from oinker.cli._utils import console, err_console, handle_errors
 from oinker.pricing import get_pricing_sync
+from oinker.pricing._types import TLDPricing
+
+
+def _sort_by_price(attr: str) -> Callable[[TLDPricing], float]:
+    return lambda x: float(getattr(x, attr)) if getattr(x, attr) else 999999.0
+
+
+_SORT_KEYS = {
+    "registration": _sort_by_price("registration"),
+    "renewal": _sort_by_price("renewal"),
+    "transfer": _sort_by_price("transfer"),
+    "tld": lambda x: x.tld,
+}
 
 pricing_app = typer.Typer(
     name="pricing",
@@ -59,14 +73,8 @@ def list_pricing(
             pricing = {tld_lower: pricing[tld_lower]}
 
         items = list(pricing.values())
-        if sort_by == "registration":
-            items.sort(key=lambda x: float(x.registration) if x.registration else 999999)
-        elif sort_by == "renewal":
-            items.sort(key=lambda x: float(x.renewal) if x.renewal else 999999)
-        elif sort_by == "transfer":
-            items.sort(key=lambda x: float(x.transfer) if x.transfer else 999999)
-        else:
-            items.sort(key=lambda x: x.tld)
+        sort_key = _SORT_KEYS.get(sort_by, _SORT_KEYS["tld"])
+        items.sort(key=sort_key)
 
         if limit:
             items = items[:limit]
