@@ -38,3 +38,5 @@ jobs:
       - run: uv run pytest --cov-report=xml
       - uses: codecov/codecov-action@v5
         if: matrix.python-version == '3.13'
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
