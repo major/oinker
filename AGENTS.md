@@ -286,10 +286,6 @@ Oinker uses **Trusted Publishing (OIDC)** - no API tokens needed. PyPI verifies 
    - Owner: `major`
    - Repository: `oinker`
    - Workflow: `publish.yml`
-   - Environment: `pypi`
-
-2. **GitHub Environment**: Repository Settings → Environments → `pypi`
-   - Enable "Required reviewers" for manual approval gate
 
 ### Release Process
 
@@ -297,37 +293,27 @@ Oinker uses **Trusted Publishing (OIDC)** - no API tokens needed. PyPI verifies 
 # 1. Bump version in pyproject.toml
 #    version = "0.1.0" → "0.2.0"
 
-# 2. Commit the version bump
+# 2. Commit, tag, and push
 git commit -am "chore: bump version to 0.2.0"
-
-# 3. Create and push tag
 git tag v0.2.0
 git push && git push --tags
 
-# 4. Create GitHub Release
-#    - Go to https://github.com/major/oinker/releases/new
-#    - Select the tag (v0.2.0)
-#    - Generate release notes (or write your own)
-#    - Click "Publish release"
-
-# 5. Approve the deployment
-#    - GitHub Actions will pause at the `pypi` environment
-#    - Review and approve to publish to PyPI
+# Done! The workflow handles the rest.
 ```
 
 ### What Happens Automatically
 
-1. GitHub Release triggers `.github/workflows/publish.yml`
-2. CI runs first (lint, typecheck, test)
-3. If CI passes, `uv build` creates wheel + sdist
-4. `pypa/gh-action-pypi-publish` uploads via OIDC (no tokens!)
-5. Package appears at [pypi.org/project/oinker](https://pypi.org/project/oinker/)
+1. Git tag push triggers `.github/workflows/publish.yml`
+2. `uv build` creates wheel + sdist
+3. `pypa/gh-action-pypi-publish` uploads via OIDC (no tokens!)
+4. `git-cliff` generates changelog from Conventional Commits
+5. GitHub Release created automatically with changelog + dist files
+6. Package appears at [pypi.org/project/oinker](https://pypi.org/project/oinker/)
 
 ### Security Features
 
 | Feature | How It Works |
 |---------|--------------|
 | No long-lived tokens | OIDC tokens expire in 15 minutes |
-| Manual approval gate | GitHub Environment protection |
 | Cryptographic attestations | Automatic with gh-action-pypi-publish |
 | Audit trail | GitHub Releases show who/when |
