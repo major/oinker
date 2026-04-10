@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Literal, cast
 
 import typer
 from rich.table import Table
@@ -257,7 +257,7 @@ def add_url_forward(
     with handle_errors():
         forward = URLForwardCreate(
             location=location,
-            type=forward_type,  # type: ignore[arg-type]
+            type=cast(Literal["temporary", "permanent"], forward_type),
             subdomain=subdomain,
             include_path=include_path,
             wildcard=wildcard,

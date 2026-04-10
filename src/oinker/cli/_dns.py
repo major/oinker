@@ -123,7 +123,7 @@ def create_record(
         record_cls = RECORD_TYPES[record_type_upper]
         # MX records need priority
         if record_type_upper == "MX":
-            record = record_cls(content=content, name=subdomain, ttl=ttl, priority=priority or 10)
+            record = MXRecord(content=content, name=subdomain, ttl=ttl, priority=priority or 10)
         else:
             record = record_cls(content=content, name=subdomain, ttl=ttl)
 
@@ -317,7 +317,7 @@ def _build_updated_record(
     record_cls = RECORD_TYPES[record_type]
 
     if record_type == "MX":
-        record = record_cls(content=content, name=subdomain, ttl=ttl, priority=priority or 10)
+        record = MXRecord(content=content, name=subdomain, ttl=ttl, priority=priority or 10)
     else:
         record = record_cls(content=content, name=subdomain, ttl=ttl)
 

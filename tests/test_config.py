@@ -99,4 +99,4 @@ class TestOinkerConfig:
         """Config should be immutable after creation."""
         config = OinkerConfig(api_key="pk1_test", secret_key="sk1_test")
         with pytest.raises(AttributeError):
-            config.api_key = "different_key"  # type: ignore[misc]
+            config.api_key = "different_key"  # ty: ignore[invalid-assignment]

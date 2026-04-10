@@ -345,7 +345,7 @@ class TestDNSRecordRegistry:
             kwargs["content"] = "1.2.3.4"
         elif record_type == "AAAA":
             kwargs["content"] = "2001:db8::1"
-        record = cls(**kwargs)
+        record = cls(**kwargs)  # ty: ignore[invalid-argument-type]  # dynamic dispatch
         assert record.record_type == record_type
 
 
